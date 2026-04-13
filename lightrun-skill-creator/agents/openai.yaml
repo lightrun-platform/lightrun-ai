@@ -1,0 +1,7 @@
+interface:
+  display_name: "Lightrun Skill Creator"
+  short_description: "Author deterministic Lightrun runtime skills"
+  icon_small: "./assets/lightrun-small.svg"
+  icon_large: "./assets/lightrun.png"
+  brand_color: "#0078D4"
+  default_prompt: "Use $lightrun-skill-creator to create or refine a runtime-oriented Lightrun skill with strict preflight, recovery, and output contracts."
