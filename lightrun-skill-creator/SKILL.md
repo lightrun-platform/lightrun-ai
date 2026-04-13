@@ -46,9 +46,10 @@ Produce runtime-oriented Lightrun skills that are deterministic, concise, and au
 4. Add generated-skill metadata rules.
    - Tools: none
    - Success: generated skills have valid `agents/openai.yaml` shape and OAuth note in generated `SKILL.md`.
-5. Finalize output contract and checklist.
+5. Finalize output contract and runtime-quality checklist.
    - Tools: none
    - Success: preflight pass/fail and runtime blocker outputs are explicit.
+   - Success: checklist items validate runtime-skill behavior and metadata correctness only.
 
 # Missing-MCP Recovery
 
@@ -73,6 +74,8 @@ Produce runtime-oriented Lightrun skills that are deterministic, concise, and au
 
 - [ ] Required sections exist and are coherent.
 - [ ] Canonical `lightrun__*` names are exact.
+- [ ] MCP preflight gate appears before runtime evidence tools.
+- [ ] Missing-MCP recovery and resume criteria are explicit and consistent.
 - [ ] Generated runtime skills use minimal required tools only.
 - [ ] Generated runtime skills include valid MCP dependency metadata.
 - [ ] Generated runtime skills document OAuth requirement in `SKILL.md`.
@@ -114,3 +117,9 @@ dependencies:
       transport: "streamable_http"
       url: "https://app.lightrun.com/mcp"
 ```
+
+## Generated Skill Checklist Guidance
+
+For generated runtime skills, include a concise checklist tailored to that skill's actual flow.
+Use artifact-verifiable checks only (tool naming, preflight/recovery/resume behavior, MCP dependency shape, OAuth documentation, and output contract clarity).
+Avoid copying a fixed checklist verbatim when items do not apply.
