@@ -35,7 +35,7 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
   - Skill allows runtime investigation steps before capability gate success.
 - On fail:
   - Go to `# Missing-MCP Recovery`.
-  - Do not proceed with runtime-tool flow drafting until corrected.
+  - Continue runtime-tool flow drafting after preflight correction is complete.
 
 # Flow
 
@@ -51,14 +51,15 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
    - Tools: `lightrun__get_runtime_sources`
    - Success: preflight pass/fail criteria and fail routing are explicit and testable.
    - Failure: preflight outcome is ambiguous or lacks fail routing.
-4. Add runtime-flow tool usage contracts.
-   - Tools: `lightrun__get_runtime_expression_values`, `lightrun__get_runtime_execution_duration`, `lightrun__get_runtime_execution_duration_samples`, `lightrun__get_runtime_numeric_metric`, `lightrun__get_runtime_numeric_metric_samples`, `lightrun__get_runtime_callstack`, `lightrun__get_runtime_execution_count`
-   - Success: each flow step declares action, tools, success condition, and failure condition.
-   - Failure: flow omits branch behavior or uses non-canonical tool identifiers.
+4. Add runtime-flow tool selection policy and usage contracts.
+   - Tools: select only the minimal subset needed for the specific skill intent.
+   - Success: each flow step declares action, selected tools, success condition, and failure condition.
+   - Success: selected tools are justified by the step goal; execution steps list only selected tools.
+   - Improvement trigger: flow should keep tool usage scoped to clear step purpose and minimal required coverage.
 5. Require dependency and icon declaration in each created runtime skill.
    - Tools: none
    - Success: created skill includes `agents/openai.yaml` with a `dependencies.tools` entry for MCP `lightrun` using the exact schema in this skill, plus interface icons (`icon_small`, `icon_large`) and `brand_color` that reuse this creator skill's icon assets; OAuth requirement is documented in created skill `SKILL.md`.
-   - Failure: dependency/OAuth/icon requirements are absent, dependency shape is invalid, or `agents/openai.yaml` does not match the required schema.
+   - Improvement trigger: dependency/OAuth/icon requirements should be present and `agents/openai.yaml` should match the required schema.
 6. Define deterministic recovery and strict resume gating.
    - Tools: `lightrun__get_runtime_sources`
    - Success: recovery loops through preflight and resume is blocked until gate success.
@@ -66,7 +67,7 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
 7. Finalize output contract and measurable checklist.
    - Tools: none
    - Success: outputs cover pass, fail, evidence, and blocker states with one next action or blocker.
-   - Failure: outputs are vague or checklist items are not auditable.
+   - Improvement trigger: outputs should stay specific and checklist items should remain auditable.
 
 # Missing-MCP Recovery
 
@@ -78,7 +79,7 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
 # Resume Criteria
 
 - Resume main flow only after `lightrun__get_runtime_sources` succeeds.
-- Do not allow `lightrun__get_runtime_expression_values`, `lightrun__get_runtime_execution_duration`, `lightrun__get_runtime_execution_duration_samples`, `lightrun__get_runtime_numeric_metric`, `lightrun__get_runtime_numeric_metric_samples`, `lightrun__get_runtime_callstack`, or `lightrun__get_runtime_execution_count` before that gate is satisfied.
+- Enable `lightrun__get_runtime_expression_values`, `lightrun__get_runtime_execution_duration`, `lightrun__get_runtime_execution_duration_samples`, `lightrun__get_runtime_numeric_metric`, `lightrun__get_runtime_numeric_metric_samples`, `lightrun__get_runtime_callstack`, and `lightrun__get_runtime_execution_count` after the gate is satisfied.
 
 # Output Contract
 
@@ -98,14 +99,15 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
 - [ ] Required headings exist in exact required order.
 - [ ] Canonical runtime tool identifiers match the embedded canonical list exactly.
 - [ ] Created runtime skills include MCP dependency metadata for `lightrun`.
-- [ ] Created runtime skills use `type`/`value` dependency schema (not `name`/`required`).
+- [ ] Created runtime skills use `type`/`value` dependency schema.
 - [ ] Created runtime skills include OAuth requirement in `SKILL.md`.
 - [ ] Created runtime skills define `icon_small`, `icon_large`, and `brand_color`.
-- [ ] Created runtime skills reuse creator icon assets (no new icon files).
+- [ ] Created runtime skills reuse creator icon assets.
 - [ ] Preflight pass and fail criteria are explicit and testable.
 - [ ] Missing-MCP recovery loops through preflight before resume.
 - [ ] Resume criteria block runtime flow before gate success.
 - [ ] Each flow step has action, tools, success, and failure outcomes.
+- [ ] Generated flow uses only the minimal required tools for its objective.
 - [ ] Output contract covers pass, fail, evidence, and blocker states.
 - [ ] Final output includes one clear next action or blocker.
 
@@ -119,6 +121,16 @@ Produce runtime-oriented Lightrun skills that are deterministic to execute, exac
 - `lightrun__get_runtime_numeric_metric_samples`
 - `lightrun__get_runtime_callstack`
 - `lightrun__get_runtime_execution_count`
+
+### Runtime Tool Selection Rule
+
+When generating a new runtime skill, start with the smallest useful tool set for the intended workflow.
+
+- Treat the canonical tool list as an allowed catalog and select from it per intent.
+- In each flow step, include only tools needed for that step objective.
+- Prefer the smallest viable tool set for deterministic evidence collection.
+- If a tool is optional, label it optional and describe its activation condition.
+- Keep execution instructions goal-driven and scoped to the selected tools.
 
 ## Created Skill Metadata Requirements
 
@@ -147,7 +159,7 @@ interface:
   brand_color: "<same value as lightrun-skill-creator interface.brand_color>"
 ```
 
-Do not hardcode repository-relative icon paths in the generated skill spec.
+Keep icon guidance inheritance-based so generated skill specs remain location-agnostic.
 
 ### Required MCP Dependency Shape
 
