@@ -53,10 +53,17 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 - Record the selected tool identifier exactly as exposed by MCP.
 - Prefer the smallest useful set of tools for each investigation step.
 
+# Source Selection Confidence
+
+- When the agent is unsure which agent/tag/custom-source to use, ask the user to choose the intended investigation target.
+- Present a short comparison of candidate targets and why each might fit.
+- Continue after user clarification, then proceed with the selected source.
+
 # Investigation Principles
 
 - Start with hypotheses first, then choose tools.
 - Capture evidence that can confirm or falsify a specific hypothesis.
+- Collect runtime evidence whenever feasible, even when a bug cause appears obvious.
 - Prefer eliminating wrong hypotheses quickly over collecting broad low-signal data.
 - End with a diagnosis statement that includes confidence and remaining uncertainty.
 
@@ -119,18 +126,24 @@ Investigation template:
    - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
 3. Run preflight and select a target source.
    - Tools: `lightrun__get_runtime_sources`
-   - Success: one source-targeting mode is selected and justified.
-4. Execute focused evidence steps per hypothesis.
+   - Success: one source-targeting mode is selected and justified, with user clarification when source selection confidence is low.
+4. Map full codepath and choose triggerable evidence points.
+   - Tools: none
+   - Success: full assumed bug codepath is explored, and action points are placed on executable lines likely to trigger in reproduction.
+5. Execute focused evidence steps per hypothesis.
    - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
    - Typical tool categories include expression capture, call path capture, execution frequency, duration, and numeric metric sampling.
    - Success: each evidence step is mapped to one hypothesis and either strengthens or weakens it.
-5. Iterate investigation loop.
-   - Tools: same minimal subset as step 4
+6. Ask for issue reproduction within action window.
+   - Tools: none
+   - Success: user receives clear reproduction instructions and timing window while runtime actions are active.
+7. Iterate investigation loop.
+   - Tools: same minimal subset as step 5
    - Success: repeat capture and assessment until one leading hypothesis remains, or all hypotheses are inconclusive.
-6. Synthesize diagnosis and confidence.
+8. Synthesize diagnosis and confidence.
    - Tools: none
    - Success: findings differentiate facts from inference, ruled-out hypotheses are explicit, and uncertainty is bounded.
-7. Produce decision-ready handoff with next actions.
+9. Produce decision-ready handoff with next actions.
    - Tools: none
    - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
 
@@ -148,6 +161,8 @@ Investigation template:
   - reason/error class
   - immediate next action
 - Final handoff:
+  - selected source and source-selection note (if user clarification was needed)
+  - reproduction instruction + action time window used
   - investigation question
   - hypothesis matrix result (leading, ruled out, inconclusive)
   - evidence summary (facts first)
@@ -166,8 +181,13 @@ Investigation template:
 - [ ] Evidence tool selection references MCP tool descriptions and hypothesis fit.
 - [ ] Missing-MCP recovery includes MCP install + OAuth authorization + retry.
 - [ ] Resume criteria explicitly gates evidence tools on preflight success.
+- [ ] Source uncertainty is escalated to the user before selecting a target.
 - [ ] Investigation starts with explicit hypotheses before tool selection.
+- [ ] Investigation explores full assumed codepath before placing runtime actions.
+- [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
+- [ ] Reproduction guidance is provided to the user while actions are active.
 - [ ] Evidence collection stays aligned with hypothesis-required tools.
+- [ ] Runtime evidence is collected whenever feasible, including when the likely cause appears clear.
 - [ ] Each evidence step explicitly confirms or falsifies at least one hypothesis.
 - [ ] Output contract includes explicit pass/fail/blocker/handoff states.
 - [ ] Findings separate direct runtime facts from inferred conclusions.
