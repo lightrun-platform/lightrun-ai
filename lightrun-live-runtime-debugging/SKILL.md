@@ -83,6 +83,9 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 - Re-check source targeting after timeout/no-hit outcomes:
   - confirm selected source target(s) still match the suspected execution path,
   - ask the user to confirm source choice when confidence drops after failed captures.
+- For other action errors, consult the Lightrun troubleshooting guide and apply the most relevant remediation:
+  - https://docs.lightrun.com/troubleshooting/overview/
+  - summarize which troubleshooting path was used and why it fits the observed error.
 - Log mitigation decisions in the handoff (what changed and why).
 
 # Bug Explanation and Fix Proposal Standard
@@ -172,6 +175,7 @@ Investigation template:
   - failed `lightrun__*` tool
   - reason/error class
   - mitigation applied (timeout/window update and/or source revalidation)
+  - troubleshooting reference used (when applicable)
   - immediate next action
 - Final handoff:
   - selected source target(s) and source-selection note (if user clarification was needed)
@@ -203,6 +207,7 @@ Investigation template:
 - [ ] Reproduction guidance is provided to the user while actions are active.
 - [ ] Timeout/no-hit outcomes trigger window review and optional timeout increase before concluding.
 - [ ] Source fit is revalidated after failed captures, with user confirmation when confidence drops.
+- [ ] Non-timeout action errors trigger consultation of the Lightrun troubleshooting guide before concluding.
 - [ ] Evidence collection stays aligned with hypothesis-required tools.
 - [ ] Runtime evidence is collected whenever feasible, including when the likely cause appears clear.
 - [ ] Each evidence step explicitly confirms or falsifies at least one hypothesis.
