@@ -55,9 +55,10 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 
 # Source Selection Confidence
 
-- When the agent is unsure which agent/tag/custom-source to use, ask the user to choose the intended investigation target.
-- Present a short comparison of candidate targets and why each might fit.
-- Continue after user clarification, then proceed with the selected source.
+- First evaluate candidate agent/tag/custom-source options and choose the best-fit target when confidence is sufficient.
+- If several targets can fit, select one or multiple strongest candidates using explicit reasoning (service ownership, environment match, and expected trigger path).
+- Ask the user for source clarification when confidence remains low after this evaluation.
+- When clarification is needed, present a short comparison of candidates and continue after the user selects the source.
 
 # Investigation Principles
 
@@ -126,7 +127,7 @@ Investigation template:
    - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
 3. Run preflight and select a target source.
    - Tools: `lightrun__get_runtime_sources`
-   - Success: one source-targeting mode is selected and justified, with user clarification when source selection confidence is low.
+   - Success: one or multiple source targets are selected and justified by agent reasoning, with user clarification only when confidence remains low.
 4. Map full codepath and choose triggerable evidence points.
    - Tools: none
    - Success: full assumed bug codepath is explored, and action points are placed on executable lines likely to trigger in reproduction.
@@ -150,7 +151,7 @@ Investigation template:
 # Output Contract
 
 - Preflight pass:
-  - selected source target (`agentPoolName` + selector mode)
+  - selected source target(s) (`agentPoolName` + selector mode(s))
   - next runtime action (first evidence tool and why)
 - Preflight fail:
   - blocker category
@@ -161,7 +162,7 @@ Investigation template:
   - reason/error class
   - immediate next action
 - Final handoff:
-  - selected source and source-selection note (if user clarification was needed)
+  - selected source target(s) and source-selection note (if user clarification was needed)
   - reproduction instruction + action time window used
   - investigation question
   - hypothesis matrix result (leading, ruled out, inconclusive)
@@ -181,7 +182,9 @@ Investigation template:
 - [ ] Evidence tool selection references MCP tool descriptions and hypothesis fit.
 - [ ] Missing-MCP recovery includes MCP install + OAuth authorization + retry.
 - [ ] Resume criteria explicitly gates evidence tools on preflight success.
-- [ ] Source uncertainty is escalated to the user before selecting a target.
+- [ ] Source selection is attempted by the agent first using explicit fit reasoning.
+- [ ] Source selection supports one or multiple targets when multi-source coverage improves confidence.
+- [ ] Source uncertainty is escalated to the user when confidence remains low after agent evaluation.
 - [ ] Investigation starts with explicit hypotheses before tool selection.
 - [ ] Investigation explores full assumed codepath before placing runtime actions.
 - [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
