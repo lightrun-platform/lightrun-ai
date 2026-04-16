@@ -74,6 +74,17 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 - Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
 - When timing is adjusted, include a short reason describing the expected diagnostic benefit.
 
+# Action Error Mitigation
+
+- If a runtime action returns no hits or a timeout-related failure:
+  - verify whether a custom timeout/window was set,
+  - increase the active collection window when the scenario needs more trigger time,
+  - ask the user to reproduce again within the updated window.
+- Re-check source targeting after timeout/no-hit outcomes:
+  - confirm selected source target(s) still match the suspected execution path,
+  - ask the user to confirm source choice when confidence drops after failed captures.
+- Log mitigation decisions in the handoff (what changed and why).
+
 # Bug Explanation and Fix Proposal Standard
 
 - Explain the bug as a concrete execution path:
@@ -140,7 +151,7 @@ Investigation template:
    - Success: user receives clear reproduction instructions and timing window while runtime actions are active.
 7. Iterate investigation loop.
    - Tools: same minimal subset as step 5
-   - Success: repeat capture and assessment until one leading hypothesis remains, or all hypotheses are inconclusive.
+   - Success: repeat capture and assessment until one leading hypothesis remains, or all hypotheses are inconclusive, including timeout/source mitigation when captures fail.
 8. Synthesize diagnosis and confidence.
    - Tools: none
    - Success: findings differentiate facts from inference, ruled-out hypotheses are explicit, and uncertainty is bounded.
@@ -160,6 +171,7 @@ Investigation template:
 - Runtime blocker:
   - failed `lightrun__*` tool
   - reason/error class
+  - mitigation applied (timeout/window update and/or source revalidation)
   - immediate next action
 - Final handoff:
   - selected source target(s) and source-selection note (if user clarification was needed)
@@ -189,6 +201,8 @@ Investigation template:
 - [ ] Investigation explores full assumed codepath before placing runtime actions.
 - [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
 - [ ] Reproduction guidance is provided to the user while actions are active.
+- [ ] Timeout/no-hit outcomes trigger window review and optional timeout increase before concluding.
+- [ ] Source fit is revalidated after failed captures, with user confirmation when confidence drops.
 - [ ] Evidence collection stays aligned with hypothesis-required tools.
 - [ ] Runtime evidence is collected whenever feasible, including when the likely cause appears clear.
 - [ ] Each evidence step explicitly confirms or falsifies at least one hypothesis.
