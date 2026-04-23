@@ -1,24 +1,52 @@
 # Lightrun Skills
 
-Small, task-focused skills for Lightrun workflows.
+A collection of reusable skills for investigating runtime issues with Lightrun.
 
-## What Is In This Repo
+## What is in this repository
 
-- Runtime debugging skills
-- Skill authoring and maintenance skills
-- Shared conventions for deterministic skill behavior
+- `skills/` — skill folders (`SKILL.md`, plus optional assets/scripts)
+- `.cursor-plugin/` — Cursor plugin metadata
+- `.claude-plugin/` — Claude plugin metadata
+- `.mcp.json` — MCP server configuration used by the plugin metadata
 
-## Skill Layout
+## Available skills
 
-Each skill should include:
+- `lightrun-live-runtime-debugging` — deterministic live-runtime investigation workflow with preflight checks, evidence capture, and handoff output.
 
-- `SKILL.md` (behavior and workflow)
-- `agents/openai.yaml` (optional UI/dependency metadata)
-- optional `assets/`, `scripts/`, or `references/`
+## Installation
 
-## Conventions
+### Cursor
 
-- Keep skills deterministic and easy to audit.
-- Use exact MCP tool names (no paraphrasing).
-- For runtime skills, require Lightrun MCP + OAuth in the skill guidance.
-- Keep outputs concise and action-oriented.
+1. Open Cursor.
+2. Add plugin from repository URL (or local path).
+3. Use this repository URL: `https://github.com/lightrun/lightrun-skills`
+
+### Claude
+
+This repository includes:
+
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json`
+
+Use your Claude plugin/marketplace flow to install from this repository.
+
+### Codex
+
+Codex loads skills from `.agents/skills` locations.
+
+1. Copy or symlink skill folders from `skills/` into one of:
+   - `$REPO_ROOT/.agents/skills`
+   - `$HOME/.agents/skills`
+2. Restart/reload Codex if needed.
+
+## Requirements
+
+- Access to Lightrun MCP server
+- Completed MCP OAuth authorization for your environment
+
+## Contributing
+
+1. Add a new folder under `skills/<skill-name>/`.
+2. Add `SKILL.md` with YAML frontmatter (`name`, `description`).
+3. Add optional assets/scripts if needed.
+4. Update marketplace/plugin metadata when adding publishable skills.
