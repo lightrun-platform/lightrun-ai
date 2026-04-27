@@ -1,0 +1,17 @@
+{
+  "name": "lightrun-skills",
+  "description": "Lightrun runtime investigation skills for deterministic, evidence-first debugging.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Lightrun"
+  },
+  "homepage": "https://github.com/lightrun/lightrun-skills",
+  "repository": "https://github.com/lightrun/lightrun-skills",
+  "license": "MIT",
+  "keywords": [
+    "lightrun",
+    "runtime-debugging",
+    "skills",
+    "observability"
+  ]
+}

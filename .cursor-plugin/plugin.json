@@ -1,0 +1,19 @@
+{
+  "name": "lightrun-skills",
+  "skills": "skills",
+  "mcpServers": ".mcp.json",
+  "description": "Lightrun live-runtime debugging skills with deterministic preflight and evidence-first diagnosis.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Lightrun"
+  },
+  "homepage": "https://github.com/lightrun/lightrun-skills",
+  "repository": "https://github.com/lightrun/lightrun-skills",
+  "license": "MIT",
+  "keywords": [
+    "lightrun",
+    "runtime-debugging",
+    "skills",
+    "observability"
+  ]
+}
