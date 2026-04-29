@@ -1,12 +1,12 @@
 {
-  "name": "lightrun-skills",
+  "name": "lightrun-ai",
   "description": "Lightrun runtime investigation skills for deterministic, evidence-first debugging.",
   "version": "0.1.0",
   "author": {
     "name": "Lightrun"
   },
-  "homepage": "https://github.com/lightrun/lightrun-skills",
-  "repository": "https://github.com/lightrun/lightrun-skills",
+  "homepage": "https://github.com/lightrun-platform/lightrun-ai",
+  "repository": "https://github.com/lightrun-platform/lightrun-ai",
   "license": "MIT",
   "keywords": [
     "lightrun",
