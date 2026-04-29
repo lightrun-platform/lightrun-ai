@@ -18,11 +18,3 @@ Please include:
 Lightrun MCP requires authenticated access to a Lightrun account. Access is governed by Lightrun roles, permissions, API key scopes, and runtime source access controls.
 
 Do not publish API keys, OAuth tokens, bearer tokens, customer identifiers, or internal environment URLs in GitHub issues, pull requests, screenshots, or examples.
-
-## Sensitive data guidance
-
-When using Lightrun MCP:
-
-- Avoid inspecting secrets, credentials, tokens, or personally identifiable information unless explicitly authorized.
-- Scope runtime inspections to the minimum code area needed for debugging.
-- Follow your organization's production debugging and data handling policies.
