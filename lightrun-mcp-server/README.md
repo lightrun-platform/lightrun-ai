@@ -47,7 +47,7 @@ Use the example that matches your client.
 
 ## Registry metadata
 
-This folder includes `server.json` metadata for MCP registry and marketplace submissions. The MCP server documentation lives in this `lightrun-mcp-server` subfolder inside the `lightrun-ai` repository.
+The repository root includes `server.json` metadata for MCP registry and marketplace submissions. The metadata points to this `lightrun-mcp-server` subfolder inside the `lightrun-ai` repository.
 
 ## Requirements
 

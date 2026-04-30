@@ -67,7 +67,7 @@ https://docs.lightrun.com/mcp/mcp-quickstart/
 ## Official MCP Registry
 
 Metadata file:
-server.json
+server.json at the repository root
 
 Repository:
 https://github.com/lightrun-platform/lightrun-ai
