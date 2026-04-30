@@ -1,5 +1,5 @@
 {
-  "name": "lightrun-skills",
+  "name": "lightrun-ai",
   "owner": {
     "name": "Lightrun"
   },
@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "lightrun-skills",
+      "name": "lightrun-ai",
       "source": ".",
       "skills": "skills",
       "description": "Lightrun runtime investigation skills for deterministic, evidence-first debugging."

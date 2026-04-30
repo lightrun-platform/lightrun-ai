@@ -1,4 +1,4 @@
-# Lightrun Skills
+# Lightrun AI
 
 A collection of reusable skills for investigating runtime issues with Lightrun.
 
@@ -19,7 +19,7 @@ A collection of reusable skills for investigating runtime issues with Lightrun.
 
 1. Open Cursor.
 2. Add plugin from repository URL (or local path).
-3. Use this repository URL: `https://github.com/lightrun/lightrun-skills`
+3. Use this repository URL: `https://github.com/lightrun-platform/lightrun-ai`
 
 ### Claude
 
