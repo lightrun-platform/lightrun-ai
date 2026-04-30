@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.lightrun/mcp-server",
+  "title": "Lightrun MCP Server",
+  "description": "Connect AI assistants to live runtime context for production debugging.",
+  "websiteUrl": "https://docs.lightrun.com/mcp/mcp-quickstart/",
+  "repository": {
+    "url": "https://github.com/lightrun-platform/lightrun-ai",
+    "source": "github",
+    "subfolder": "lightrun-mcp-server"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://app.lightrun.com/mcp"
+    }
+  ]
+}

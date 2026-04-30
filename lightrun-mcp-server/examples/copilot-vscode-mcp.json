@@ -1,0 +1,7 @@
+{
+  "servers": {
+    "Lightrun": {
+      "url": "https://app.lightrun.com/mcp"
+    }
+  }
+}
