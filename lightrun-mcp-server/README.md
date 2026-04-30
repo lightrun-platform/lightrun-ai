@@ -34,6 +34,21 @@ For Lightrun SaaS, use:
 
 For single-tenant and self-hosted deployments, replace the URL with your organization's Lightrun MCP endpoint from the Lightrun MCP page in the Lightrun platform.
 
+## MCP configuration filenames
+
+MCP configuration file names and schemas vary by client.
+
+- Cursor uses `.cursor/mcp.json` with a top-level `mcpServers` object.
+- VS Code and GitHub Copilot Chat use `.vscode/mcp.json` with a top-level `servers` object.
+- GitHub Copilot CLI uses `~/.copilot/mcp-config.json` with a top-level `mcpServers` object.
+- Some MCP clients accept the server URL or JSON configuration directly in their UI.
+
+Use the example that matches your client.
+
+## Registry metadata
+
+This folder includes `server.json` metadata for MCP registry and marketplace submissions. The MCP server documentation lives in this `lightrun-mcp-server` subfolder inside the `lightrun-ai` repository.
+
 ## Requirements
 
 - A Lightrun account

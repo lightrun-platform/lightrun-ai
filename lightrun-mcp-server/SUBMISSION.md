@@ -28,10 +28,13 @@ Lightrun MCP connects AI coding assistants to live runtime context from producti
 ## MCP Market
 
 Repository name:
-lightrun-mcp-server
+lightrun-ai
 
-Suggested repository URL:
-https://github.com/lightrun-platform/lightrun-mcp-server
+Repository URL:
+https://github.com/lightrun-platform/lightrun-ai
+
+Repository subfolder:
+lightrun-mcp-server
 
 Short description:
 Connect AI assistants to live runtime context from production and staging applications using Lightrun.
@@ -60,3 +63,14 @@ support@lightrun.com
 
 Documentation:
 https://docs.lightrun.com/mcp/mcp-quickstart/
+
+## Official MCP Registry
+
+Metadata file:
+server.json
+
+Repository:
+https://github.com/lightrun-platform/lightrun-ai
+
+Subfolder:
+lightrun-mcp-server
