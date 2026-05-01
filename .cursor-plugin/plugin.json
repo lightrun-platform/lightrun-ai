@@ -1,7 +1,7 @@
 {
   "name": "lightrun-ai",
   "skills": "skills",
-  "mcpServers": ".mcp.json",
+  "mcpServers": ".cursor/mcp.json",
   "description": "Lightrun live-runtime debugging skills with deterministic preflight and evidence-first diagnosis.",
   "version": "0.1.0",
   "author": {

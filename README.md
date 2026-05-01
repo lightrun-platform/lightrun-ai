@@ -7,7 +7,7 @@ A collection of reusable skills for investigating runtime issues with Lightrun.
 - `skills/` — skill folders (`SKILL.md`, plus optional assets/scripts)
 - `.cursor-plugin/` — Cursor plugin metadata
 - `.claude-plugin/` — Claude plugin metadata
-- `.mcp.json` — MCP server configuration used by the plugin metadata
+- `.cursor/mcp.json` — Cursor MCP server configuration used by the plugin metadata
 
 ## Available skills
 
