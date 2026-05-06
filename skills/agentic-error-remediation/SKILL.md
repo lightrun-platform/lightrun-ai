@@ -133,10 +133,13 @@ Use this skill in the following sequence:
 2. Verify whether the problem is new or known using the persistent storage.
 3. If the problem is known according to the persistent storage,
    3.1. Read hypothesis and requests identifiers from a persistent storage.
-   3.2. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
-   3.3. Summarize final diagnosis based on hypothesis statuses.
-   3.4. Publish a fix proposal in a repository.
-   3.5. Finish the current investigation run and stop the chat immediately
+   3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
+   3.3. If any related Lightrun actions are in progress, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
+   3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these snapshots, quit the known-problem logical branch, and continue as if there were no snapshots at all; add new snapshots only after generating a new hypothesis.
+   3.5. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
+   3.6. Summarize final diagnosis based on hypothesis statuses.
+   3.7. Publish a fix proposal in a repository.
+   3.8. Finish the current investigation run and stop the chat immediately
 4. List top hypotheses and the signal expected for each.
 5. Run preflight and pick runtime source target.
 6. Request focused runtime signals with the minimal useful tool set.
@@ -172,20 +175,29 @@ Investigation template:
     3.1. Read hypothesis and requests identifiers from a persistent storage.
       - Tools: choose from currently available MCPs persistent storage tools based on their descriptions and fit to the problem's description. 
       - Success: hypothesis and requests identifiers correspond to the problem's description are found in the persistent storage.
-    3.2. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
+    3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
+      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by request ID. 
+      - Success: related Lightrun action statuses are known.
+    3.3. If any related Lightrun actions are in progress, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
+      - Tools: none
+      - Success: The conversation has finished.
+    3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these snapshots, quit the known-problem logical branch, and continue as if there were no snapshots at all; add new snapshots only after generating a new hypothesis.
+      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of cancelling snapshots by request ID.
+      - Success: failed snapshots are cancelled when cancellation is available, and the investigation returns to new hypothesis generation without treating prior snapshots as usable evidence.
+    3.5. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by request ID. 
       - Success: hypothesis statuses are updated according to the runtime tool results.  
-    3.3. Summarize final diagnosis based on hypothesis statuses.
+    3.6. Summarize final diagnosis based on hypothesis statuses.
       - Tools: none
       - Success: final diagnosis is summarized based on hypothesis statuses.
-    3.4. If the final diagnosis is conclusive.
-        3.5. Publish a fix proposal in a repository.
+    3.7. If the final diagnosis is conclusive.
+        3.8. Publish a fix proposal in a repository.
           - Tools: choose from currently available MCPs for source code management based on their descriptions. 
           - Success: PR is created with the fix proposal. 
-        3.6. Produce decision-ready handoff.
+        3.9. Produce decision-ready handoff.
           - Tools: none
           - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
-        3.7. Finish the current investigation run and stop the chat immediately.
+        3.10. Finish the current investigation run and stop the chat immediately.
           - Tools: none
           - Success: The conversation has finished.
 4. Create a hypothesis matrix.
