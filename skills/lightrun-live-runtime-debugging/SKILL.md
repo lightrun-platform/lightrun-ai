@@ -1,9 +1,14 @@
 ---
 name: lightrun-live-runtime-debugging
 description: >-
-  Guide deterministic runtime investigations in live environments using Lightrun
-  MCP tools, with preflight gating, recovery/resume rules, evidence-first
-  diagnosis, and explicit blocker/handoff outputs.
+  Guides live runtime debugging of running applications using Lightrun MCP tools.
+  Use when the user needs to debug a production or staging service without
+  redeploying, add dynamic logs to a running process, capture variable snapshots
+  at specific code locations, diagnose production errors in real time, investigate
+  live incidents by collecting runtime evidence, or trace execution paths and
+  metric samples from active Lightrun agents. Covers preflight source validation,
+  hypothesis-driven evidence capture, timeout and error recovery, and a
+  structured diagnosis handoff with a concrete code-fix proposal.
 version: 0.1.0
 ---
 
@@ -24,46 +29,55 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 
 # MCP Preflight
 
-- Required gate tool:
-  - `lightrun__get_runtime_sources`
-- Pass criteria:
-  - At least one valid agent pool is returned.
-  - A concrete target is selected: `agentNames` or `customSourceName` or `tagNames`.
-- Fail criteria:
-  - Tool is unavailable, call fails, or source list is empty.
+- Required gate tool: `lightrun__get_runtime_sources`
+- Pass criteria: at least one valid agent pool is returned and a concrete target is selected (`agentNames`, `customSourceName`, or `tagNames`).
+- Fail criteria: tool is unavailable, call fails, or source list is empty.
+
+**Example preflight call:**
+```
+lightrun__get_runtime_sources()
+// Returns: list of agent pools, tags, and custom sources available for targeting
+// Example return shape: { agentPools: [{ name: "payments-prod", agents: ["payments-service-prod-1"] }], tags: ["prod", "staging"], customSources: [] }
+```
 
 # Missing-MCP Recovery
 
 1. Classify failure: missing tool, runtime call error, or empty source list.
-2. Instruct remediation:
-   - Install/enable Lightrun MCP.
-   - Complete MCP OAuth authorization.
-   - Verify access to the expected environment/agent pool.
-3. Re-run `lightrun__get_runtime_sources`.
-4. Continue investigation after preflight success.
+2. Remediate: install/enable Lightrun MCP, complete OAuth authorization, verify access to the expected environment/agent pool.
+3. Re-run `lightrun__get_runtime_sources` and continue after preflight success.
 
-# Resume Criteria
+Resume: runtime evidence tools are activated only after `lightrun__get_runtime_sources` returns valid sources.
 
-- Resume the investigation after `lightrun__get_runtime_sources` returns valid sources.
-- Runtime evidence tools are activated after preflight success.
+# Source Selection and Revalidation
 
-# Runtime Tool Selection Strategy
+- Evaluate all candidate agent/tag/custom-source options returned by preflight and choose the best-fit target using service ownership, environment match, and expected trigger path.
+- Select one or multiple strongest candidates with explicit reasoning when multiple targets fit.
+- Ask for user clarification only when confidence remains low after this evaluation; present a short comparison of candidates and continue after the user selects.
+- **Revalidation trigger:** re-confirm source fit after any failed capture (timeout or no-hit). Reassess candidate options and ask the user to confirm if confidence drops below a clear choice. Log the revalidation reason in the final handoff.
+
+# Runtime Tool Selection
 
 - Keep preflight fixed on `lightrun__get_runtime_sources`.
-- For evidence collection, explore available Lightrun MCP tools and their descriptions, then select the best-fit tool for each hypothesis signal.
+- For evidence collection, inspect available Lightrun MCP tools and their descriptions, then select the best-fit tool for each hypothesis signal.
 - Record the selected tool identifier exactly as exposed by MCP.
-- Prefer the smallest useful set of tools for each investigation step.
+- Prefer the smallest useful set of tools per investigation step.
+- Typical tool categories: expression capture, call-path capture, execution frequency, duration, and numeric metric sampling.
 
-# Source Selection Confidence
-
-- First evaluate candidate agent/tag/custom-source options and choose the best-fit target when confidence is sufficient.
-- If several targets can fit, select one or multiple strongest candidates using explicit reasoning (service ownership, environment match, and expected trigger path).
-- Ask the user for source clarification when confidence remains low after this evaluation.
-- When clarification is needed, present a short comparison of candidates and continue after the user selects the source.
+**Example evidence tool call (substitute actual MCP-exposed identifier and all required parameters):**
+```
+lightrun__add_log(
+  agentName: "payments-service-prod-1",   // exact agent name from preflight
+  filename: "src/payments/processor.py",  // relative source path
+  lineNumber: 142,                         // must be an executable line
+  format: "amount={amount} status={status} userId={user_id}"  // expression placeholders
+)
+// Expected return: { actionId: "<uuid>", status: "ACTIVE", expiresAt: "<ISO timestamp>" }
+// Injects a dynamic log at line 142 without redeployment
+```
 
 # Investigation Principles
 
-- Start with hypotheses first, then choose tools.
+- Start with hypotheses, then choose tools.
 - Capture evidence that can confirm or falsify a specific hypothesis.
 - Collect runtime evidence whenever feasible, even when a bug cause appears obvious.
 - Prefer eliminating wrong hypotheses quickly over collecting broad low-signal data.
@@ -72,51 +86,26 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 # Tool Call Timing
 
 - Use tool default collection timing unless the investigation clearly benefits from a different window.
-- Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
+- If a runtime action returns no hits or a timeout-related failure: verify whether a custom timeout was set, increase the collection window, and ask the user to reproduce again within the updated window. Then revalidate source targeting (see **Source Selection and Revalidation**).
 - When timing is adjusted, include a short reason describing the expected diagnostic benefit.
 
 # Action Error Mitigation
 
-- If a runtime action returns no hits or a timeout-related failure:
-  - verify whether a custom timeout/window was set,
-  - increase the active collection window when the scenario needs more trigger time,
-  - ask the user to reproduce again within the updated window.
-- Re-check source targeting after timeout/no-hit outcomes:
-  - confirm selected source target(s) still match the suspected execution path,
-  - ask the user to confirm source choice when confidence drops after failed captures.
-- For other action errors, consult the Lightrun troubleshooting guide and apply the most relevant remediation:
-  - https://docs.lightrun.com/troubleshooting/overview/
-  - summarize which troubleshooting path was used and why it fits the observed error.
+- **No hits / timeout**: increase active collection window, ask for reproduction within the new window. If hits still do not appear, revalidate source targeting (see **Source Selection and Revalidation**).
+- **Other errors**: consult the Lightrun troubleshooting guide (https://docs.lightrun.com/troubleshooting/overview/), summarize which path was used and why it fits the observed error.
 - Log mitigation decisions in the handoff (what changed and why).
 
 # Bug Explanation and Fix Proposal Standard
 
-- Explain the bug as a concrete execution path:
-  - trigger conditions
-  - key state values observed at runtime
-  - exact code path or branch that produces the failure
-  - visible impact for users or system behavior
+- Explain the bug as a concrete execution path: trigger conditions, key state values observed at runtime, exact code path or branch that produces the failure, visible impact.
 - Tie each diagnosis claim to runtime evidence and code location.
-- Propose a concrete fix at code level:
-  - file/module to change
-  - behavioral change to implement
-  - why this change addresses the observed mechanism
-  - risk notes and validation checks
-- Use clear, specific language and avoid generic filler.
+- Propose a concrete fix: file/module to change, behavioral change to implement, why it addresses the observed mechanism, risk notes and validation checks.
 
 # Quick Use Guide
 
-Use this skill in the following sequence:
-
-1. Define the investigation question in one sentence.
-2. List top hypotheses and the signal expected for each.
-3. Run preflight and pick runtime source target.
-4. Collect focused runtime signals with the minimal useful tool set.
-5. Update hypothesis status after each signal.
-6. Publish diagnosis, confidence, and next best action.
-
 Investigation template:
 
+```
 - Question:
 - Impact:
 - Hypotheses:
@@ -131,89 +120,46 @@ Investigation template:
 - Leading diagnosis:
 - Confidence:
 - Next action:
+```
 
 # Flow
 
-1. Frame the investigation problem.
-   - Tools: none
-   - Success: symptom, impact, expected behavior, and investigation question are explicit.
-2. Create a hypothesis matrix.
-   - Tools: none
-   - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
-3. Run preflight and select a target source.
-   - Tools: `lightrun__get_runtime_sources`
-   - Success: one or multiple source targets are selected and justified by agent reasoning, with user clarification only when confidence remains low.
-4. Map full codepath and choose triggerable evidence points.
-   - Tools: none
-   - Success: full assumed bug codepath is explored, and action points are placed on executable lines likely to trigger in reproduction.
-5. Execute focused evidence steps per hypothesis.
-   - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
-   - Typical tool categories include expression capture, call path capture, execution frequency, duration, and numeric metric sampling.
-   - Success: each evidence step is mapped to one hypothesis and either strengthens or weakens it.
-6. Ask for issue reproduction within action window.
-   - Tools: none
-   - Success: user receives clear reproduction instructions and timing window while runtime actions are active.
-7. Iterate investigation loop.
-   - Tools: same minimal subset as step 5
-   - Success: repeat capture and assessment until one leading hypothesis remains, or all hypotheses are inconclusive, including timeout/source mitigation when captures fail.
-8. Synthesize diagnosis and confidence.
-   - Tools: none
-   - Success: findings differentiate facts from inference, ruled-out hypotheses are explicit, and uncertainty is bounded.
-9. Produce decision-ready handoff with next actions.
-   - Tools: none
-   - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
+1. **Frame the problem.** — Symptom, impact, expected behavior, and investigation question are explicit.
+2. **Create hypothesis matrix.** — At least 2 plausible hypotheses, each with a planned confirming and falsifying signal.
+3. **Run preflight and select source target.** — `lightrun__get_runtime_sources`; target selected and justified per **Source Selection and Revalidation**; user clarification only when confidence is low after agent evaluation.
+4. **Map codepath and choose evidence points.** — Full assumed bug codepath explored; action points placed on executable lines likely to trigger during reproduction.
+5. **Execute focused evidence steps.** — Choose from available Lightrun MCP runtime tools based on descriptions and hypothesis fit; each step mapped to one hypothesis.
+6. **Request reproduction.** — User receives clear reproduction instructions and timing window while runtime actions are active.
+7. **Iterate investigation loop.** — Repeat capture and assessment until one leading hypothesis remains or all are inconclusive; apply timeout and source mitigation per **Tool Call Timing** and **Action Error Mitigation** when captures fail.
+8. **Synthesize diagnosis.** — Separate runtime facts from inferred conclusions; rule out hypotheses explicitly; bound remaining uncertainty.
+9. **Produce decision-ready handoff.** — Fully populate the output contract below.
 
 # Output Contract
 
-- Preflight pass:
-  - selected source target(s) (`agentPoolName` + selector mode(s))
-  - next runtime action (first evidence tool and why)
-- Preflight fail:
-  - blocker category
-  - exact remediation required
-  - explicit retry condition
-- Runtime blocker:
-  - failed `lightrun__*` tool
-  - reason/error class
-  - mitigation applied (timeout/window update and/or source revalidation)
-  - troubleshooting reference used (when applicable)
-  - immediate next action
-- Final handoff:
-  - selected source target(s) and source-selection note (if user clarification was needed)
-  - reproduction instruction + action time window used
-  - investigation question
-  - hypothesis matrix result (leading, ruled out, inconclusive)
-  - evidence summary (facts first)
-  - bug mechanism summary (trigger, path, failure point, impact)
-  - diagnosis statement with confidence level
-  - disconfirming evidence considered
-  - remaining unknowns and why they matter
-  - concrete code-fix proposal (target files/modules, behavior change, validation plan)
-  - recommended next step
-  - artifact path + checklist status
+**Preflight pass:**
+- Selected source target(s) (`agentPoolName` + selector mode)
+- Next runtime action (first evidence tool and why)
 
-# Runtime Quality Checklist
+**Preflight fail:**
+- Blocker category
+- Exact remediation required
+- Explicit retry condition
 
-- [ ] `lightrun__get_runtime_sources` appears before any runtime evidence tool.
-- [ ] For each selected runtime tool, the identifier matches the MCP-exposed name exactly.
-- [ ] Evidence tool selection references MCP tool descriptions and hypothesis fit.
-- [ ] Missing-MCP recovery includes MCP install + OAuth authorization + retry.
-- [ ] Resume criteria explicitly gates evidence tools on preflight success.
-- [ ] Source selection is attempted by the agent first using explicit fit reasoning.
-- [ ] Source selection supports one or multiple targets when multi-source coverage improves confidence.
-- [ ] Source uncertainty is escalated to the user when confidence remains low after agent evaluation.
-- [ ] Investigation starts with explicit hypotheses before tool selection.
-- [ ] Investigation explores full assumed codepath before placing runtime actions.
-- [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
-- [ ] Reproduction guidance is provided to the user while actions are active.
-- [ ] Timeout/no-hit outcomes trigger window review and optional timeout increase before concluding.
-- [ ] Source fit is revalidated after failed captures, with user confirmation when confidence drops.
-- [ ] Non-timeout action errors trigger consultation of the Lightrun troubleshooting guide before concluding.
-- [ ] Evidence collection stays aligned with hypothesis-required tools.
-- [ ] Runtime evidence is collected whenever feasible, including when the likely cause appears clear.
-- [ ] Each evidence step explicitly confirms or falsifies at least one hypothesis.
-- [ ] Output contract includes explicit pass/fail/blocker/handoff states.
-- [ ] Findings separate direct runtime facts from inferred conclusions.
-- [ ] Final handoff includes a diagnosis statement, confidence, and ruled-out hypotheses.
-- [ ] Final handoff explains bug mechanism with concrete runtime-to-code traceability.
-- [ ] Final handoff includes a concrete code-fix proposal with validation checks.
+**Runtime blocker:**
+- Failed `lightrun__*` tool + reason/error class
+- Mitigation applied (window update and/or source revalidation)
+- Troubleshooting reference used (when applicable)
+- Immediate next action
+
+**Final handoff:**
+- Selected source target(s) and source-selection note (if user clarification was needed)
+- Reproduction instruction + action time window used
+- Investigation question
+- Hypothesis matrix result (leading, ruled out, inconclusive)
+- Evidence summary (facts first)
+- Bug mechanism summary (trigger, path, failure point, impact)
+- Diagnosis statement with confidence level
+- Disconfirming evidence considered
+- Remaining unknowns and why they matter
+- Concrete code-fix proposal (target files/modules, behavior change, validation plan)
+- Recommended next step
