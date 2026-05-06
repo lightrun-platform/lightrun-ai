@@ -20,18 +20,27 @@ Provide a repeatable runtime debugging workflow that helps QA and engineers inve
 - User can access the target service source path and line location.
 - Lightrun MCP server is installed and authenticated.
 - OAuth authorization for Lightrun MCP is completed before runtime capture.
-- Any state persistence tool is installed, configured, and authenticated.
+- A state persistence tool is installed, configured, and authenticated, or a deterministic local state fallback under the Lightrun home directory is writable.
 
 ### State persistence tool discovery
-This skill requires saving a small state (e.g., UUIDs, timestamps, or status flags) to persist between sessions.
+This skill requires saving small investigation state (e.g., problem IDs, hypothesis IDs, runtime action IDs, timestamps, or status flags) to persist between unattended sessions.
 
 **Storage Discovery Protocol:**
 1. **Identify Tool:** Look for any available MCP tool that supports "storing", "logging", "creating a task", or "writing data".
 2. **Priority:**
     - If a Database MCP is available (e.g., SQLite, Postgres), create/use a table named `skill_metadata`.
     - If a Task Tracker MCP is available (e.g., Jira, Linear), create/update a dedicated "State Tracking" issue.
-    - If a File System MCP is available, use a file named `state.json`.
-3. **Requirement:** The storage must be able to hold a simple key-value pair or a small JSON object.
+    - If a File System MCP is available, use only a configured external state root outside the repository/workspace.
+3. **Local fallback:** If no connected persistent storage is available, use the user-level Lightrun home directory:
+    - If `LIGHTRUN_HOME_DIRECTORY` is set, write to `${LIGHTRUN_HOME_DIRECTORY}/lightrun-agentic-error-remediation/state.json`.
+    - Otherwise, on Linux/macOS, write to `$HOME/.lightrun/lightrun-agentic-error-remediation/state.json`.
+    - Otherwise, on Windows, write to `%USERPROFILE%\.lightrun\lightrun-agentic-error-remediation\state.json`.
+4. **Path safety:** Resolve the selected local path before writing. The resolved path must not be inside the current repository/workspace, source subdirectories, generated build/output folders, generic agent memory/conversation folders, or temporary workspace directories.
+5. **Requirement:** The storage must be able to hold a simple key-value pair or a small JSON object.
+6. **Fail closed:** If no connected storage exists and no valid local state path is writable, do not create ad hoc files and do not ask for interactive clarification. Stop before scheduling asynchronous runtime actions and return a machine-readable blocker: `state-storage-unavailable`.
+
+### Automation and portability
+This skill may run unattended and with different coding agents. Do not rely on agent-specific directories or interactive prompts for storage, source-selection, or reproduction decisions. Use the Lightrun home directory convention for local state. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
 
 # MCP Preflight
 
@@ -69,7 +78,7 @@ This skill requires saving a small state (e.g., UUIDs, timestamps, or status fla
 
 - First evaluate candidate agent/tag/custom-source options and choose the best-fit target when confidence is sufficient.
 - If several targets can fit, select one or multiple strongest candidates using explicit reasoning (service ownership, environment match, and expected trigger path).
-- Choose the most appropriate option automatically when confidence remains low after this evaluation
+- Choose the most appropriate option automatically when confidence remains low but a defensible target exists; if no defensible target can be selected without guessing, return `runtime-source-ambiguous` with an explicit retry condition.
 
 # Investigation Principles
 
@@ -86,14 +95,14 @@ This skill requires saving a small state (e.g., UUIDs, timestamps, or status fla
 - Use tool default collection timing unless the investigation clearly benefits from a different window.
 - Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
 - When timing is adjusted, include a short reason describing the expected diagnostic benefit.
-- When using asynchronous tools, do not wait for the tool to complete but save data in persistent storage to get results later.
+- Before using asynchronous tools, verify state storage is available. If it is unavailable, return `state-storage-unavailable` and do not schedule runtime actions. When state storage is available, save action IDs and related investigation state before ending the run.
 
 # Action Error Mitigation
 
 - If a runtime action returns no hits or a timeout-related failure:
   - verify whether a custom timeout/window was set,
   - increase the active collection window when the scenario needs more trigger time,
-  - ask the user to reproduce again within the updated window.
+  - return `reproduction-required` with the updated action window and explicit retry condition.
 - Re-check source targeting after timeout/no-hit outcomes:
   - confirm selected source target(s) still match the suspected execution path,
 - For other action errors, consult the Lightrun troubleshooting guide and apply the most relevant remediation:
@@ -127,12 +136,12 @@ Use this skill in the following sequence:
    3.2. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
    3.3. Summarize final diagnosis based on hypothesis statuses.
    3.4. Publish a fix proposal in a repository.
-   3.5. Finish the current run of the investigation and stop the chat immediately
+   3.5. Finish the current investigation run and stop the chat immediately
 4. List top hypotheses and the signal expected for each.
 5. Run preflight and pick runtime source target.
 6. Request focused runtime signals with the minimal useful tool set.
-7. Save unique problem's id, hypothesis, and requests identifiers to persistent storage.
-8. Finish the current run of the investigation and stop the chat immediately
+7. Save the unique problem ID, hypotheses, and request identifiers to the selected persistent state storage.
+8. Finish the current investigation run and stop the chat immediately
 
 Investigation template:
 
@@ -176,7 +185,7 @@ Investigation template:
         3.6. Produce decision-ready handoff.
           - Tools: none
           - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
-        3.7. Finish the current run of the investigation and stop the chat immediately.
+        3.7. Finish the current investigation run and stop the chat immediately.
           - Tools: none
           - Success: The conversation has finished.
 4. Create a hypothesis matrix.
@@ -184,15 +193,15 @@ Investigation template:
    - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
 5. Run preflight and select a target source.
    - Tools: `lightrun__get_runtime_sources`
-   - Success: one or multiple source targets are selected and justified by agent reasoning, with user clarification only when confidence remains low.
+   - Success: one or multiple source targets are selected and justified by agent reasoning without interactive clarification, or `runtime-source-ambiguous` is returned with an explicit retry condition.
 6. Map full codepath and choose triggerable evidence points.
    - Tools: none
    - Success: full assumed bug codepath is explored, and action points are placed on executable lines likely to trigger in reproduction.
-7. Execute focused evidence steps per hypothesis saving action ids to persistent storage as requests IDs.
+7. Execute focused evidence steps per hypothesis, saving action IDs to the selected persistent state storage as request IDs.
    - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
    - Typical tool categories include expression capture, call path capture, execution frequency, duration, and numeric metric sampling.
    - Success: each evidence step is mapped to one hypothesis.
-8. Finish the current run of the investigation and stop the chat immediately.
+8. Finish the current investigation run and stop the chat immediately.
      - Tools: none
      - Success: The conversation has finished.
 
@@ -206,13 +215,14 @@ Investigation template:
   - exact remediation required
   - explicit retry condition
 - Runtime blocker:
-  - failed `lightrun__*` tool
+  - blocker reason, including `state-storage-unavailable` when safe state persistence cannot be selected
+  - failed `lightrun__*` tool, when applicable
   - reason/error class
   - mitigation applied (timeout/window update and/or source revalidation)
   - troubleshooting reference used (when applicable)
   - immediate next action
 - Final handoff:
-  - selected source target(s) and source-selection note (if user clarification was needed)
+  - selected source target(s) and source-selection note, or `runtime-source-ambiguous` when no defensible target was selected
   - reproduction instruction + action time window used
   - investigation question
   - hypothesis matrix result (leading, ruled out, inconclusive)
