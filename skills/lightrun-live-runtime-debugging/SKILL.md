@@ -4,6 +4,7 @@ description: >-
   Guide deterministic runtime investigations in live environments using Lightrun
   MCP tools, with preflight gating, recovery/resume rules, evidence-first
   diagnosis, and explicit blocker/handoff outputs.
+version: 0.1.0
 ---
 
 # Goal
