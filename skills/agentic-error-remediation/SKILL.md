@@ -86,6 +86,10 @@ This skill may run unattended and with different coding agents. Do not rely on a
 - Start with hypotheses first, then choose tools.
 - Capture evidence that can confirm or falsify a specific hypothesis.
 - Collect runtime evidence whenever feasible, even when a bug cause appears obvious.
+- Treat scheduled Lightrun snapshots as an evidence gate, not as optional supporting data.
+- Do not make a final diagnosis, open a PR, implement a fallback fix, or cancel a still-relevant snapshot until its results have been retrieved.
+- Treat terminal no-hit, timeout, failed, cancelled, or error snapshot states without retrieved results as blockers or reproduction-required handoffs, not as permission to proceed to fix delivery.
+- Do not block the active session waiting for a reproduction that may take a long time; check snapshot status once per investigation run, then either retrieve available results or hand off the active reproduction requirement.
 - Prefer eliminating wrong hypotheses quickly over collecting broad low-signal data.
 - Choose the final diagnosis statement only after all hypotheses are ruled out with runtime evidence.
 - Explain the bug mechanism with concrete runtime-to-code traceability.
@@ -97,6 +101,18 @@ This skill may run unattended and with different coding agents. Do not rely on a
 - Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
 - When timing is adjusted, include a short reason describing the expected diagnostic benefit.
 - Before using asynchronous tools, verify state storage is available. If it is unavailable, return `state-storage-unavailable` and do not schedule runtime actions. When state storage is available, save action IDs, cleanup status, and related investigation state before ending the run.
+
+# Mandatory Snapshot Result Gate
+
+When a Lightrun snapshot action is created for a hypothesis, the investigation MUST verify whether snapshot results are available before moving to diagnosis or fix delivery. Verification is a single status check per investigation run, not an open-ended polling loop.
+
+- Immediately check the snapshot status once after creation, and once when resuming a known problem with a persisted snapshot action.
+- Do not repeatedly poll, sleep, or wait in the active session for a snapshot that has no hits yet.
+- If the single status check reports captured hits, retrieve the snapshot values and/or call stack before taking any other diagnostic conclusion step.
+- If status remains pending or running with no hits, return `reproduction-required` with exact trigger instructions, persist the active action, and leave the snapshot active; do not open a PR, implement a local fix, cancel the snapshot, or issue a final diagnosis.
+- If the snapshot reaches a terminal no-hit, timeout, failed, canceled, or error state without captured results, record that result, apply the action error mitigation rules, and return a blocker or `reproduction-required`; do not open a PR, implement a local fix, or issue a final diagnosis.
+- Do not treat any traces, logs, stack traces, or static code inspection as a substitute for retrieving the created snapshot's results.
+- Do not cancel a snapshot created for the active leading hypothesis merely because a likely fix is clear.
 
 # Runtime Action Cleanup
 
@@ -143,6 +159,7 @@ This skill may run unattended and with different coding agents. Do not rely on a
 # Fix Proposal Delivery Policy
 
 - Prefer opening a PR with the fix proposal whenever the final diagnosis is conclusive and repository/source-management access makes PR creation possible.
+- A final diagnosis is not conclusive while any required snapshot for the active leading hypothesis is still pending, running, or has unread results.
 - Treat PR creation as possible when the target repository is identified, source-management tools or MCPs are available and authorized, a branch/commit or equivalent proposal can be created, and the fix can be represented as a patch.
 - Before making local source-code edits, check available source-management tools or MCPs for a way to create a PR, pull request, merge request, or repository-native change proposal.
 - Do not implement local source-code changes as the primary output when a PR can be opened.
@@ -161,7 +178,7 @@ Use this skill in the following sequence:
 3. If the problem is known according to the persistent storage,
    3.1. Read hypothesis and requests identifiers from a persistent storage.
    3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
-   3.3. If any related Lightrun actions are in progress and still required, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
+   3.3. If any related snapshot actions are in progress and still required, check status once; retrieve results when available, otherwise return `reproduction-required` with the action retained.
    3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these actions, quit the known-problem logical branch, and continue as if there were no actions at all; add new actions only after generating a new hypothesis.
    3.5. Cancel any related Lightrun actions created by this skill that are no longer required.
    3.6. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
@@ -172,7 +189,9 @@ Use this skill in the following sequence:
 5. Run preflight and pick runtime source target.
 6. Request focused runtime signals with the minimal useful tool set.
 7. Save the unique problem ID, hypotheses, request identifiers, and action cleanup status to the selected persistent state storage.
-8. Finish the current investigation run and stop the chat immediately
+8. For every created snapshot, check status once using the mandatory snapshot result gate before diagnosis or fix delivery.
+9. If a snapshot needs external reproduction and has no hits yet, return `reproduction-required` with the active action ID, reproduction steps, and retry condition, then stop.
+10. Finish the current investigation run only after retrieved snapshot results, blocker, or reproduction-required handoff has been persisted.
 
 Investigation template:
 
@@ -206,9 +225,9 @@ Investigation template:
     3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by request ID. 
       - Success: related Lightrun action statuses are known.
-    3.3. If any related Lightrun actions are in progress and still required, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
-      - Tools: none
-      - Success: The conversation has finished.
+    3.3. If any related snapshot actions are in progress and still required, check their status once according to the mandatory snapshot result gate.
+      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to checking snapshot status and retrieving snapshot values or call stacks.
+      - Success: snapshot results are retrieved, or a blocker/reproduction-required handoff is produced without fix delivery.
     3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these actions, quit the known-problem logical branch, and continue as if there were no actions at all; add new actions only after generating a new hypothesis.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of cancelling actions by request ID.
       - Success: failed actions are cancelled when cancellation is available, and the investigation returns to new hypothesis generation without treating prior actions as usable evidence.
@@ -247,7 +266,10 @@ Investigation template:
    - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
    - Typical tool categories include expression capture, call path capture, execution frequency, duration, and numeric metric sampling.
    - Success: each evidence step is mapped to one hypothesis, and every created action has a persisted cleanup status.
-8. Finish the current investigation run and stop the chat immediately.
+8. Check every snapshot required by the active hypotheses once.
+   - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to checking snapshot status and retrieving captured values or call stacks.
+   - Success: snapshot values or call stacks are retrieved and persisted, or a blocker/reproduction-required handoff is returned without fix delivery.
+9. Finish the current investigation run only after the mandatory snapshot result gate has been satisfied by retrieved results, or a blocker/reproduction-required handoff has been persisted.
      - Tools: none
      - Success: The conversation has finished.
 
@@ -267,6 +289,14 @@ Investigation template:
   - mitigation applied (timeout/window update and/or source revalidation)
   - troubleshooting reference used (when applicable)
   - immediate next action
+- Reproduction required:
+  - active snapshot action ID(s)
+  - selected source target(s)
+  - exact reproduction instruction
+  - action time window used
+  - expected captured values or call stack
+  - retry condition
+  - persisted state artifact path
 - Final handoff:
   - selected source target(s) and source-selection note, or `runtime-source-ambiguous` when no defensible target was selected
   - reproduction instruction + action time window used
@@ -281,7 +311,7 @@ Investigation template:
   - concrete code-fix proposal (target files/modules, behavior change, validation plan)
   - fix delivery artifact (PR URL or identifier when opened; otherwise PR blocker reason and local source-code paths changed)
   - recommended next step
-  - artifact path + checklist status
+  - artifact path + checklist  status
 
 # Runtime Quality Checklist
 
@@ -295,6 +325,8 @@ Investigation template:
 - [ ] Investigation starts with explicit hypotheses before tool selection.
 - [ ] Investigation explores full assumed codepath before placing runtime actions.
 - [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
+- [ ] Every created snapshot is checked exactly once per investigation run; results are retrieved when available, otherwise blocker/reproduction-required handoff is produced without fix delivery.
+- [ ] No PR, local fix, final diagnosis, or cancellation occurs while a required snapshot is still pending/running or has unread results.
 - [ ] Runtime actions created by this skill are cancelled when no longer required, or explicitly retained with a current purpose.
 - [ ] Action cleanup status is persisted before the run ends.
 - [ ] Non-timeout action errors trigger consultation of the Lightrun troubleshooting guide before concluding.
