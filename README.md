@@ -13,6 +13,11 @@ A collection of reusable skills for investigating runtime issues with Lightrun.
 
 - `lightrun-live-runtime-debugging` — deterministic live-runtime investigation workflow with preflight checks, evidence capture, and handoff output.
 
+## Demos
+
+- [Codex live debugging demo](https://www.youtube.com/watch?v=bIaa5_MeKlg)
+- [Claude live debugging demo](https://www.youtube.com/watch?v=2RKvQTBs3pk)
+
 ## Installation
 
 ### Cursor
