@@ -23,7 +23,7 @@ Provide a repeatable runtime debugging workflow that helps QA and engineers inve
 - A state persistence tool is installed, configured, and authenticated, or a deterministic local state fallback under the Lightrun home directory is writable.
 
 ### State persistence tool discovery
-This skill requires saving small investigation state (e.g., problem IDs, hypothesis IDs, runtime action IDs, timestamps, or status flags) to persist between unattended sessions.
+This skill requires saving small investigation state (e.g., problem IDs, hypothesis IDs, runtime action IDs, timestamps, status flags, or cleanup status) to persist between unattended sessions.
 
 **Storage Discovery Protocol:**
 1. **Identify Tool:** Look for any available MCP tool that supports "storing", "logging", "creating a task", or "writing data".
@@ -95,7 +95,21 @@ This skill may run unattended and with different coding agents. Do not rely on a
 - Use tool default collection timing unless the investigation clearly benefits from a different window.
 - Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
 - When timing is adjusted, include a short reason describing the expected diagnostic benefit.
-- Before using asynchronous tools, verify state storage is available. If it is unavailable, return `state-storage-unavailable` and do not schedule runtime actions. When state storage is available, save action IDs and related investigation state before ending the run.
+- Before using asynchronous tools, verify state storage is available. If it is unavailable, return `state-storage-unavailable` and do not schedule runtime actions. When state storage is available, save action IDs, cleanup status, and related investigation state before ending the run.
+
+# Runtime Action Cleanup
+
+- Treat every asynchronous Lightrun action created by this skill as owned by the current investigation and persist its action ID, hypothesis ID, purpose, creation time, last known status, and cleanup status.
+- Before ending any run, review all actions created by this skill for the active problem and cancel actions that are no longer required.
+- Cancel an action when:
+  - its hypothesis has been ruled out,
+  - a final diagnosis has been reached and the action is not needed for handoff evidence,
+  - the action is duplicate, stale, mistargeted, or replaced by a newer action,
+  - the investigation is blocked before reproduction and the action would otherwise remain active without a clear retry path.
+- Do not cancel actions created by another investigation, another user, or an unknown owner.
+- Do not cancel active actions that are still required to collect an expected reproduction signal; leave them active only when the handoff explicitly states why they remain required and how to continue.
+- Before cancelling, retrieve any newly captured values or call stacks when the action status reports unread hits.
+- Use the most specific available Lightrun MCP cancellation tool for the action type, record the cancellation result in persistent state, and include a cleanup summary in the handoff.
 
 # Action Error Mitigation
 
@@ -134,16 +148,17 @@ Use this skill in the following sequence:
 3. If the problem is known according to the persistent storage,
    3.1. Read hypothesis and requests identifiers from a persistent storage.
    3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
-   3.3. If any related Lightrun actions are in progress, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
-   3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these snapshots, quit the known-problem logical branch, and continue as if there were no snapshots at all; add new snapshots only after generating a new hypothesis.
-   3.5. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
-   3.6. Summarize final diagnosis based on hypothesis statuses.
-   3.7. Publish a fix proposal in a repository.
-   3.8. Finish the current investigation run and stop the chat immediately
+   3.3. If any related Lightrun actions are in progress and still required, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
+   3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these actions, quit the known-problem logical branch, and continue as if there were no actions at all; add new actions only after generating a new hypothesis.
+   3.5. Cancel any related Lightrun actions created by this skill that are no longer required.
+   3.6. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
+   3.7. Summarize final diagnosis based on hypothesis statuses.
+   3.8. Publish a fix proposal in a repository.
+   3.9. Finish the current investigation run and stop the chat immediately
 4. List top hypotheses and the signal expected for each.
 5. Run preflight and pick runtime source target.
 6. Request focused runtime signals with the minimal useful tool set.
-7. Save the unique problem ID, hypotheses, and request identifiers to the selected persistent state storage.
+7. Save the unique problem ID, hypotheses, request identifiers, and action cleanup status to the selected persistent state storage.
 8. Finish the current investigation run and stop the chat immediately
 
 Investigation template:
@@ -178,26 +193,29 @@ Investigation template:
     3.2. Verify related Lightrun action statuses using request IDs from persistent storage.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by request ID. 
       - Success: related Lightrun action statuses are known.
-    3.3. If any related Lightrun actions are in progress, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
+    3.3. If any related Lightrun actions are in progress and still required, notify the user that the known problem already has active runtime actions, finish the current investigation run, and stop the chat immediately.
       - Tools: none
       - Success: The conversation has finished.
-    3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these snapshots, quit the known-problem logical branch, and continue as if there were no snapshots at all; add new snapshots only after generating a new hypothesis.
-      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of cancelling snapshots by request ID.
-      - Success: failed snapshots are cancelled when cancellation is available, and the investigation returns to new hypothesis generation without treating prior snapshots as usable evidence.
-    3.5. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
+    3.4. If all related Lightrun actions failed and no further hypothesis investigation is possible from them, cancel these actions, quit the known-problem logical branch, and continue as if there were no actions at all; add new actions only after generating a new hypothesis.
+      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of cancelling actions by request ID.
+      - Success: failed actions are cancelled when cancellation is available, and the investigation returns to new hypothesis generation without treating prior actions as usable evidence.
+    3.5. Cancel any related Lightrun actions created by this skill that are no longer required.
+      - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of cancelling active actions by request ID.
+      - Success: unneeded skill-owned actions are canceled or explicitly retained with a current purpose, and cleanup status is saved.
+    3.6. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by request ID. 
       - Success: hypothesis statuses are updated according to the runtime tool results.  
-    3.6. Summarize final diagnosis based on hypothesis statuses.
+    3.7. Summarize final diagnosis based on hypothesis statuses.
       - Tools: none
       - Success: final diagnosis is summarized based on hypothesis statuses.
-    3.7. If the final diagnosis is conclusive.
-        3.8. Publish a fix proposal in a repository.
+    3.8. If the final diagnosis is conclusive.
+        3.9. Publish a fix proposal in a repository.
           - Tools: choose from currently available MCPs for source code management based on their descriptions. 
           - Success: PR is created with the fix proposal. 
-        3.9. Produce decision-ready handoff.
+        3.10. Produce decision-ready handoff.
           - Tools: none
           - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
-        3.10. Finish the current investigation run and stop the chat immediately.
+        3.11. Finish the current investigation run and stop the chat immediately.
           - Tools: none
           - Success: The conversation has finished.
 4. Create a hypothesis matrix.
@@ -212,7 +230,7 @@ Investigation template:
 7. Execute focused evidence steps per hypothesis, saving action IDs to the selected persistent state storage as request IDs.
    - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
    - Typical tool categories include expression capture, call path capture, execution frequency, duration, and numeric metric sampling.
-   - Success: each evidence step is mapped to one hypothesis.
+   - Success: each evidence step is mapped to one hypothesis, and every created action has a persisted cleanup status.
 8. Finish the current investigation run and stop the chat immediately.
      - Tools: none
      - Success: The conversation has finished.
@@ -239,6 +257,7 @@ Investigation template:
   - investigation question
   - hypothesis matrix result (leading, ruled out, inconclusive)
   - evidence summary (facts first)
+  - runtime action cleanup summary (cancelled actions, retained actions, and reasons)
   - bug mechanism summary (trigger, path, failure point, impact)
   - diagnosis statement with confidence level
   - disconfirming evidence considered
@@ -259,6 +278,8 @@ Investigation template:
 - [ ] Investigation starts with explicit hypotheses before tool selection.
 - [ ] Investigation explores full assumed codepath before placing runtime actions.
 - [ ] Runtime actions are placed on triggerable executable locations linked to the hypothesis.
+- [ ] Runtime actions created by this skill are cancelled when no longer required, or explicitly retained with a current purpose.
+- [ ] Action cleanup status is persisted before the run ends.
 - [ ] Non-timeout action errors trigger consultation of the Lightrun troubleshooting guide before concluding.
 - [ ] Evidence collection stays aligned with hypothesis-required tools.
 - [ ] Runtime evidence is collected whenever feasible, including when the likely cause appears clear.
