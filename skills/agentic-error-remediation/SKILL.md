@@ -3,7 +3,8 @@ name: lightrun-agentic-error-remediation
 description: >-
   Guide deterministic runtime investigations in environments using Lightrun
   MCP tools, with preflight gating, recovery/resume rules, evidence-first
-  diagnosis, and opening a fix proposal in a repository.
+  diagnosis, PR-first fix proposal delivery, and local source-code fallback
+  only when PR creation is not possible.
 ---
 
 # Goal
@@ -12,7 +13,7 @@ Provide a repeatable runtime debugging workflow that helps QA and engineers inve
 
 # Scope
 
-- In scope: problem framing, hypothesis ranking, runtime evidence capture and storage, hypothesis elimination, diagnosis confidence, blocker handling, fix proposal.
+- In scope: problem framing, hypothesis ranking, runtime evidence capture and storage, hypothesis elimination, diagnosis confidence, blocker handling, PR-first fix proposal delivery, source-code fallback when PR creation is blocked.
 - Out of scope: rollout decisions or postmortem ownership.
 
 # Preconditions
@@ -139,6 +140,18 @@ This skill may run unattended and with different coding agents. Do not rely on a
   - risk notes and validation checks
 - Use clear, specific language and avoid generic filler.
 
+# Fix Proposal Delivery Policy
+
+- Prefer opening a PR with the fix proposal whenever the final diagnosis is conclusive and repository/source-management access makes PR creation possible.
+- Treat PR creation as possible when the target repository is identified, source-management tools or MCPs are available and authorized, a branch/commit or equivalent proposal can be created, and the fix can be represented as a patch.
+- Before making local source-code edits, check available source-management tools or MCPs for a way to create a PR, pull request, merge request, or repository-native change proposal.
+- Do not implement local source-code changes as the primary output when a PR can be opened.
+- Implement local source-code changes only as a fallback when PR creation is blocked by missing or unauthorized source-management tools, missing repository/remote information, branch or PR permission failures, or an offline environment.
+- When using the local fallback, keep edits limited to source-code files directly required for the fix; do not modify documentation, generated files, build metadata, workflows, or unrelated repository files unless the user explicitly asks.
+- Record the delivery mode in the handoff:
+  - PR mode: PR URL or identifier, branch name, fix summary, and validation checks.
+  - Local fallback mode: PR blocker reason, modified source-code paths, fix summary, and validation checks.
+
 # Quick Use Guide
 
 Use this skill in the following sequence:
@@ -153,7 +166,7 @@ Use this skill in the following sequence:
    3.5. Cancel any related Lightrun actions created by this skill that are no longer required.
    3.6. Update hypothesis statuses after verification of signals using requests IDs from persistent storage.
    3.7. Summarize final diagnosis based on hypothesis statuses.
-   3.8. Publish a fix proposal in a repository.
+   3.8. Open a PR with the fix proposal when possible; implement a minimal local source-code fallback only if PR creation is blocked.
    3.9. Finish the current investigation run and stop the chat immediately
 4. List top hypotheses and the signal expected for each.
 5. Run preflight and pick runtime source target.
@@ -209,13 +222,16 @@ Investigation template:
       - Tools: none
       - Success: final diagnosis is summarized based on hypothesis statuses.
     3.8. If the final diagnosis is conclusive.
-        3.9. Publish a fix proposal in a repository.
-          - Tools: choose from currently available MCPs for source code management based on their descriptions. 
-          - Success: PR is created with the fix proposal. 
-        3.10. Produce decision-ready handoff.
+        3.9. Open a PR with the fix proposal when possible.
+          - Tools: choose from currently available MCPs or CLIs for source code management based on their descriptions.
+          - Success: PR is created with the fix proposal, and the PR URL or identifier is recorded.
+        3.10. If PR creation is not possible, implement a minimal local source-code fallback.
+          - Tools: local source-code editing tools only.
+          - Success: local edits are limited to source-code files directly required for the fix, and the PR blocker reason is recorded.
+        3.11. Produce decision-ready handoff.
           - Tools: none
           - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
-        3.11. Finish the current investigation run and stop the chat immediately.
+        3.12. Finish the current investigation run and stop the chat immediately.
           - Tools: none
           - Success: The conversation has finished.
 4. Create a hypothesis matrix.
@@ -263,6 +279,7 @@ Investigation template:
   - disconfirming evidence considered
   - remaining unknowns and why they matter
   - concrete code-fix proposal (target files/modules, behavior change, validation plan)
+  - fix delivery artifact (PR URL or identifier when opened; otherwise PR blocker reason and local source-code paths changed)
   - recommended next step
   - artifact path + checklist status
 
@@ -289,3 +306,5 @@ Investigation template:
 - [ ] Final handoff includes a diagnosis statement, confidence, and ruled-out hypotheses.
 - [ ] Final handoff explains bug mechanism with concrete runtime-to-code traceability.
 - [ ] Final handoff includes a concrete code-fix proposal with validation checks.
+- [ ] A PR with the fix proposal is opened whenever possible.
+- [ ] Local source-code changes are implemented only as a fallback after recording why PR creation was not possible.
