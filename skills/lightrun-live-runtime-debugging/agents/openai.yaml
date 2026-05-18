@@ -4,7 +4,7 @@ interface:
   icon_small: "./assets/lightrun-small.svg"
   icon_large: "./assets/lightrun.png"
   brand_color: "#0078D4"
-  default_prompt: "Use $lightrun-live-runtime-debugging to run a deterministic live runtime investigation with mandatory preflight, evidence-first capture, and explicit blocker/handoff output."
+  default_prompt: "Use $lightrun-live-runtime-debugging to run a deterministic live runtime investigation with mandatory preflight, evidence-first capture, async action lifecycle handling (create/status/getters/cancel), cross-run action resume by action ID, and explicit blocker/handoff output."
 
 dependencies:
   tools:
