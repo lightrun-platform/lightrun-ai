@@ -4,7 +4,7 @@ interface:
   icon_small: "./assets/lightrun-small.svg"
   icon_large: "./assets/lightrun.png"
   brand_color: "#0078D4"
-  default_prompt: "Use $agentic-error-remediation to run a deterministic runtime investigation with mandatory preflight, evidence-first capture, and PR opening."
+  default_prompt: "Use $lightrun-agentic-error-remediation to run a deterministic runtime investigation with mandatory preflight, evidence-first capture, and PR opening."
 
 dependencies:
   tools:
