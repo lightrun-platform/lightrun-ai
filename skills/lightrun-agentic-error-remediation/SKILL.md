@@ -21,27 +21,23 @@ Provide a repeatable runtime debugging workflow that helps QA and engineers inve
 - User can access the target service source path and line location.
 - Lightrun MCP server is installed and authenticated.
 - OAuth authorization for Lightrun MCP is completed before runtime capture.
-- A state persistence tool is installed, configured, and authenticated, or a deterministic local state fallback under the Lightrun home directory is writable.
+- An MCP-backed state persistence tool is installed, configured, authenticated, and writable.
 
 ### State persistence tool discovery
 This skill requires saving small investigation state (e.g., problem IDs, hypothesis IDs, runtime action IDs, timestamps, status flags, or cleanup status) to persist between unattended sessions.
 
 **Storage Discovery Protocol:**
-1. **Identify Tool:** Look for any available MCP tool that supports "storing", "logging", "creating a task", or "writing data".
+1. **Identify MCP storage:** Inspect available MCP tools/resources for durable storage before scheduling asynchronous runtime actions. Prefer tools described as "memory", "memories", "knowledge", "notes", "state", "database", "records", "tasks", "issues", "cases", "notebooks", or "documents".
 2. **Priority:**
-    - If a Database MCP is available (e.g., SQLite, Postgres), create/use a table named `skill_metadata`.
-    - If a Task Tracker MCP is available (e.g., Jira, Linear), create/update a dedicated "State Tracking" issue.
-    - If a File System MCP is available, use only a configured external state root outside the repository/workspace.
-3. **Local fallback:** If no connected persistent storage is available, use the user-level Lightrun home directory:
-    - If `LIGHTRUN_HOME_DIRECTORY` is set, write to `${LIGHTRUN_HOME_DIRECTORY}/lightrun-agentic-error-remediation/state.json`.
-    - Otherwise, on Linux/macOS, write to `$HOME/.lightrun/lightrun-agentic-error-remediation/state.json`.
-    - Otherwise, on Windows, write to `%USERPROFILE%\.lightrun\lightrun-agentic-error-remediation\state.json`.
-4. **Path safety:** Resolve the selected local path before writing. The resolved path must not be inside the current repository/workspace, source subdirectories, generated build/output folders, generic agent memory/conversation folders, or temporary workspace directories.
-5. **Requirement:** The storage must be able to hold a simple key-value pair or a small JSON object.
-6. **Fail closed:** If no connected storage exists and no valid local state path is writable, do not create ad hoc files and do not ask for interactive clarification. Stop before scheduling asynchronous runtime actions and return a machine-readable blocker: `state-storage-unavailable`.
+    - Highest priority: use a Memories/Memory MCP if available. Store one durable record per unique problem ID and update it as hypotheses, runtime action IDs, outputs, and cleanup status change.
+    - Next priority: use another connected MCP-backed persistent store, such as a database, task tracker, case tracker, notebook, wiki, document store, or repository-native issue/PR metadata.
+    - Lowest priority: use an MCP-exposed filesystem only when it is clearly a configured remote/shared persistent store. Do not use local filesystem paths through shell tools or filesystem MCPs for investigation state.
+3. **No local-file fallback:** Do not write persistent investigation state to repository files, workspace files, temp directories, agent memory/conversation folders, user-home directories, or any ad hoc local `state.json`.
+4. **Requirement:** The selected MCP-backed storage must be able to read and update a simple key-value pair or small JSON-like object keyed by a stable problem ID.
+5. **Fail closed:** If no MCP-backed persistent storage is available and writable, do not create ad hoc files and do not ask for interactive clarification. Stop before scheduling asynchronous runtime actions and return a machine-readable blocker: `state-storage-unavailable`.
 
 ### Automation and portability
-This skill may run unattended and with different coding agents. Do not rely on agent-specific directories or interactive prompts for storage, source-selection, or reproduction decisions. Use the Lightrun home directory convention for local state. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
+This skill may run unattended and with different coding agents. Do not rely on agent-specific directories, local files, user-home directories, or interactive prompts for storage, source-selection, or reproduction decisions. Use MCP-backed persistent storage only. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
 
 # MCP Preflight
 
@@ -297,7 +293,7 @@ Investigation template:
   - action time window used
   - expected captured output, such as values, call stack, metric sample, counter, or duration
   - retry condition
-  - persisted state artifact path
+  - persisted state record identifier or MCP location
 - Final handoff:
   - selected source target(s) and source-selection note, or `runtime-source-ambiguous` when no defensible target was selected
   - reproduction instruction + action time window used
@@ -312,7 +308,7 @@ Investigation template:
   - concrete code-fix proposal (target files/modules, behavior change, validation plan)
   - fix delivery artifact (PR URL or identifier when opened; otherwise PR blocker reason and local source-code paths changed)
   - recommended next step
-  - artifact path + checklist  status
+  - artifact identifier or MCP location + checklist status
 
 # Runtime Quality Checklist
 
