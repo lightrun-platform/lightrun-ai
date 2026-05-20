@@ -12,7 +12,7 @@
       "name": "lightrun-ai",
       "source": ".",
       "skills": "skills",
-      "description": "Lightrun runtime investigation skills for deterministic, evidence-first debugging."
+      "description": "Lightrun runtime investigation skills for deterministic, evidence-first debugging, and PR-first fix proposal delivery.."
     }
   ]
 }
