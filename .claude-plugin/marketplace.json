@@ -15,8 +15,8 @@
       "description": "Guide deterministic runtime investigations in live environments with mandatory preflight and blocker-aware handoff output."
     },
     {
-      "name": "lightrun-agentic-error-remediation",
-      "source": "./skills/lightrun-agentic-error-remediation",
+      "name": "lightrun-error-remediation-automation",
+      "source": "./skills/lightrun-error-remediation-automation",
       "skills": "./",
       "description": "Guide deterministic runtime error remediation with preflight gating, evidence-first diagnosis, and PR-first fix proposal delivery."
     }

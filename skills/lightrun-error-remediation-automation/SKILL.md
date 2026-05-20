@@ -1,5 +1,5 @@
 ---
-name: lightrun-agentic-error-remediation
+name: lightrun-error-remediation-automation
 description: >-
   Guide deterministic runtime investigations in environments using Lightrun
   MCP tools, with preflight gating, recovery/resume rules, evidence-first
