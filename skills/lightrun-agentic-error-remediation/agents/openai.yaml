@@ -1,0 +1,15 @@
+interface:
+  display_name: "Lightrun Agentic Error Remediation"
+  short_description: "Investigate runtime issue with deterministic evidence capture and open PR"
+  icon_small: "./assets/lightrun-small.svg"
+  icon_large: "./assets/lightrun.png"
+  brand_color: "#0078D4"
+  default_prompt: "Use $lightrun-agentic-error-remediation to run a deterministic runtime investigation with mandatory preflight, evidence-first capture, and PR opening."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "lightrun"
+      description: "Lightrun MCP server"
+      transport: "streamable_http"
+      url: "https://app.lightrun.com/mcp"

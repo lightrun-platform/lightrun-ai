@@ -12,6 +12,7 @@ A collection of reusable skills for investigating runtime issues with Lightrun.
 ## Available skills
 
 - `lightrun-live-runtime-debugging` — deterministic live-runtime investigation workflow with preflight checks, evidence capture, and handoff output.
+- `lightrun-agentic-error-remediation` — agent-driven error remediation workflow with root cause analysis, mitigation strategies, and automated fixes.
 
 ## Demos
 
