@@ -21,23 +21,23 @@ Provide a repeatable runtime debugging workflow that helps QA and engineers inve
 - User can access the target service source path and line location.
 - Lightrun MCP server is installed and authenticated.
 - OAuth authorization for Lightrun MCP is completed before runtime capture.
-- An MCP-backed state persistence tool is installed, configured, authenticated, and writable.
+- A durable state persistence tool or facility is installed/configured when needed and writable.
 
 ### State persistence tool discovery
 This skill requires saving small investigation state (e.g., problem IDs, hypothesis IDs, runtime action IDs, timestamps, status flags, or cleanup status) to persist between unattended sessions.
 
 **Storage Discovery Protocol:**
-1. **Identify MCP storage:** Inspect available MCP tools/resources for durable storage before scheduling asynchronous runtime actions. Prefer tools described as "memory", "memories", "knowledge", "notes", "state", "database", "records", "tasks", "issues", "cases", "notebooks", or "documents".
+1. **Identify durable storage:** Inspect available MCP tools/resources and agent-provided durable automation memory facilities before scheduling asynchronous runtime actions. Prefer tools or facilities described as "AutomationMemory", "memory", "memories", "knowledge", "notes", "state", "database", "records", "tasks", "issues", "cases", "notebooks", or "documents".
 2. **Priority:**
-    - Highest priority: use a Memories/Memory MCP if available. Store one durable record per unique problem ID and update it as hypotheses, runtime action IDs, outputs, and cleanup status change.
-    - Next priority: use another connected MCP-backed persistent store, such as a database, task tracker, case tracker, notebook, wiki, document store, or repository-native issue/PR metadata.
+    - Highest priority: use a Memories/Memory MCP, Cursor `AutomationMemory`, or an equivalent agent-native durable automation memory when available. Store one durable record per unique problem ID and update it as hypotheses, runtime action IDs, outputs, and cleanup status change.
+    - Next priority: use another connected persistent store, such as a database, task tracker, case tracker, notebook, wiki, document store, or repository-native issue/PR metadata exposed through MCP or the host agent.
     - Lowest priority: use an MCP-exposed filesystem only when it is clearly a configured remote/shared persistent store. Do not use local filesystem paths through shell tools or filesystem MCPs for investigation state.
-3. **No local-file fallback:** Do not write persistent investigation state to repository files, workspace files, temp directories, agent memory/conversation folders, user-home directories, or any ad hoc local `state.json`.
-4. **Requirement:** The selected MCP-backed storage must be able to read and update a simple key-value pair or small JSON-like object keyed by a stable problem ID.
-5. **Fail closed:** If no MCP-backed persistent storage is available and writable, do not create ad hoc files and do not ask for interactive clarification. Stop before scheduling asynchronous runtime actions and return a machine-readable blocker: `state-storage-unavailable`.
+3. **No local-file fallback:** Do not write persistent investigation state to repository files, workspace files, temp directories, agent conversation logs, agent-specific local memory folders, user-home directories, or any ad hoc local `state.json`. This ban does not apply to an explicitly exposed durable automation memory facility such as Cursor `AutomationMemory` when it supports read/update by stable key.
+4. **Requirement:** The selected storage must be able to read and update a simple key-value pair or small JSON-like object keyed by a stable problem ID.
+5. **Fail closed:** If no approved persistent storage is available and writable, do not create ad hoc files and do not ask for interactive clarification. Stop before scheduling asynchronous runtime actions and return a machine-readable blocker: `state-storage-unavailable`.
 
 ### Automation and portability
-This skill may run unattended and with different coding agents. Do not rely on agent-specific directories, local files, user-home directories, or interactive prompts for storage, source-selection, or reproduction decisions. Use MCP-backed persistent storage only. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
+This skill may run unattended and with different coding agents. Do not rely on agent-specific directories, local files, user-home directories, or interactive prompts for storage, source-selection, or reproduction decisions. Use approved durable persistent storage only: a Memories/Memory MCP, Cursor `AutomationMemory`, an equivalent agent-native durable automation memory, or another connected persistent store. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
 
 # MCP Preflight
 
@@ -213,11 +213,11 @@ Investigation template:
    - Tools: none
    - Success: symptom, impact, expected behavior, and investigation question are explicit.
 2. Verify whether the problem is new or known using the persistent storage.
-    - Tools: choose from currently available MCPs persistent storage tools based on their descriptions and fit to the problem's description.
+    - Tools: choose from currently available persistent storage tools/facilities based on their descriptions and fit to the problem's description.
     - Success: the problem is verified against the list of known problems in the persistent storage.
 3. If the problem is known according to the persistent storage,
     3.1. Read hypothesis and runtime action identifiers from persistent storage.
-      - Tools: choose from currently available MCPs persistent storage tools based on their descriptions and fit to the problem's description. 
+      - Tools: choose from currently available persistent storage tools/facilities based on their descriptions and fit to the problem's description.
       - Success: hypothesis and runtime action identifiers that correspond to the problem description are found in persistent storage.
     3.2. Verify related Lightrun action statuses/results using action IDs or result identifiers from persistent storage.
       - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the task of getting information about completed actions by action ID or result identifier. 
@@ -293,7 +293,7 @@ Investigation template:
   - action time window used
   - expected captured output, such as values, call stack, metric sample, counter, or duration
   - retry condition
-  - persisted state record identifier or MCP location
+  - persisted state record identifier, storage location, or MCP location
 - Final handoff:
   - selected source target(s) and source-selection note, or `runtime-source-ambiguous` when no defensible target was selected
   - reproduction instruction + action time window used
@@ -308,7 +308,7 @@ Investigation template:
   - concrete code-fix proposal (target files/modules, behavior change, validation plan)
   - fix delivery artifact (PR URL or identifier when opened; otherwise PR blocker reason and local source-code paths changed)
   - recommended next step
-  - artifact identifier or MCP location + checklist status
+  - artifact identifier, storage location, or MCP location + checklist status
 
 # Runtime Quality Checklist
 
