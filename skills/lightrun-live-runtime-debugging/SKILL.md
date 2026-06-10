@@ -25,7 +25,7 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 # MCP Preflight
 
 - Required gate tool:
-  - `lightrun__get_runtime_sources`
+  - `get_runtime_sources`
 - Pass criteria:
   - At least one valid agent pool is returned.
   - A concrete target is selected: `agentNames` or `customSourceName` or `tagNames`.
@@ -39,18 +39,18 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
    - Install/enable Lightrun MCP.
    - Complete MCP OAuth authorization.
    - Verify access to the expected environment/agent pool.
-3. Re-run `lightrun__get_runtime_sources`.
+3. Re-run `get_runtime_sources`.
 4. Continue investigation after preflight success.
 
 # Resume Criteria
 
-- Resume the investigation after `lightrun__get_runtime_sources` returns valid sources.
+- Resume the investigation after `get_runtime_sources` returns valid sources.
 - Runtime evidence tools are activated after preflight success.
 - For asynchronous runtime actions, resume by re-checking previously created action IDs before creating duplicate actions.
 
 # Runtime Tool Selection Strategy
 
-- Keep preflight fixed on `lightrun__get_runtime_sources`.
+- Keep preflight fixed on `get_runtime_sources`.
 - At run start, inspect currently exposed Lightrun runtime tools and their descriptions before selecting an evidence path.
 - For evidence collection, select the best-fit tool set for each hypothesis signal based on both investigation needs and currently exposed capabilities.
 - Record the selected tool identifier exactly as exposed by MCP.
@@ -224,7 +224,7 @@ Investigation template:
    - Tools: none
    - Success: selected path matches both investigation needs and currently exposed tool capabilities.
 4. Run preflight and select a target source.
-   - Tools: `lightrun__get_runtime_sources`
+   - Tools: `get_runtime_sources`
    - Success: one or multiple source targets are selected and justified by agent reasoning, with user clarification only when confidence remains low.
 5. Map full codepath and choose triggerable evidence points.
    - Tools: none
@@ -270,7 +270,7 @@ Investigation template:
   - exact remediation required
   - explicit retry condition
 - Runtime blocker:
-  - failed `lightrun__*` tool
+  - failed Lightrun MCP tool
   - reason/error class
   - mitigation applied (timeout/window update and/or source revalidation)
   - troubleshooting reference used (when applicable)
@@ -307,7 +307,7 @@ Investigation template:
 
 # Runtime Quality Checklist
 
-- [ ] `lightrun__get_runtime_sources` appears before any runtime evidence tool.
+- [ ] `get_runtime_sources` appears before any runtime evidence tool.
 - [ ] For each selected runtime tool, the identifier matches the MCP-exposed name exactly.
 - [ ] Each runtime action has an explicit decision it can change.
 - [ ] Two consecutive low-information actions trigger strategy change.

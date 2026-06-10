@@ -42,7 +42,7 @@ This skill may run unattended and with different coding agents. Do not rely on a
 # MCP Preflight
 
 - Required gate tool:
-  - `lightrun__get_runtime_sources`
+  - `get_runtime_sources`
 - Pass criteria:
   - At least one valid agent pool is returned.
   - A concrete target is selected: `agentNames` or `customSourceName` or `tagNames`.
@@ -56,17 +56,17 @@ This skill may run unattended and with different coding agents. Do not rely on a
    - Install/enable Lightrun MCP.
    - Complete MCP OAuth authorization.
    - Verify access to the expected environment/agent pool.
-3. Re-run `lightrun__get_runtime_sources`.
+3. Re-run `get_runtime_sources`.
 4. Continue investigation after preflight success.
 
 # Resume Criteria
 
-- Resume the investigation after `lightrun__get_runtime_sources` returns valid sources.
+- Resume the investigation after `get_runtime_sources` returns valid sources.
 - Runtime evidence tools are activated after preflight success.
 
 # Runtime Tool Selection Strategy
 
-- Keep preflight fixed on `lightrun__get_runtime_sources`.
+- Keep preflight fixed on `get_runtime_sources`.
 - For evidence collection, explore available Lightrun MCP tools and their descriptions, then select the best-fit async tool for each hypothesis signal.
 - Record the selected tool identifier exactly as exposed by MCP.
 - Prefer the smallest useful set of tools for each investigation step.
@@ -254,7 +254,7 @@ Investigation template:
    - Tools: none
    - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
 5. Run preflight and select a target source.
-   - Tools: `lightrun__get_runtime_sources`
+   - Tools: `get_runtime_sources`
    - Success: one or multiple source targets are selected and justified by agent reasoning without interactive clarification, or `runtime-source-ambiguous` is returned with an explicit retry condition.
 6. Map full codepath and choose triggerable evidence points.
    - Tools: none
@@ -281,7 +281,7 @@ Investigation template:
   - explicit retry condition
 - Runtime blocker:
   - blocker reason, including `state-storage-unavailable` when safe state persistence cannot be selected
-  - failed `lightrun__*` tool, when applicable
+  - failed Lightrun MCP tool, when applicable
   - reason/error class
   - mitigation applied (timeout/window update and/or source revalidation)
   - troubleshooting reference used (when applicable)
@@ -312,7 +312,7 @@ Investigation template:
 
 # Runtime Quality Checklist
 
-- [ ] `lightrun__get_runtime_sources` appears before any runtime evidence tool.
+- [ ] `get_runtime_sources` appears before any runtime evidence tool.
 - [ ] For each selected runtime tool, the identifier matches the MCP-exposed name exactly.
 - [ ] Evidence tool selection references MCP tool descriptions and hypothesis fit.
 - [ ] Missing-MCP recovery includes MCP install + OAuth authorization + retry.

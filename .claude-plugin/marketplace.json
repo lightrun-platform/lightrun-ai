@@ -19,6 +19,12 @@
       "source": "./skills/lightrun-error-remediation-automation",
       "skills": "./",
       "description": "Guide deterministic runtime error remediation with preflight gating, evidence-first diagnosis, and PR-first fix proposal delivery."
+    },
+    {
+      "name": "lightrun-ask-prod",
+      "source": "./skills/lightrun-ask-prod",
+      "skills": "./",
+      "description": "Answer questions about live production system behavior — current values, durations, hit counts, and distributions — by instrumenting running services with Lightrun."
     }
   ]
 }
