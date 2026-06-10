@@ -13,6 +13,7 @@ A collection of reusable skills for investigating runtime issues with Lightrun.
 
 - `lightrun-live-runtime-debugging` — deterministic live-runtime investigation workflow with preflight checks, evidence capture, and handoff output.
 - `lightrun-error-remediation-automation` — error remediation automation workflow with root cause analysis, mitigation strategies, and automated fixes.
+- `lightrun-ask-prod` — live production runtime question answering for current values, durations, hit counts, and distributions.
 
 ## Demos
 
