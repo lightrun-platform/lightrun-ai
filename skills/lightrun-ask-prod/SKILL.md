@@ -36,10 +36,10 @@ Select the Lightrun capability that best fits the question. More than one may be
 
 | If the question asks... | Use... |
 |---|---|
-| What is the current value of X? | Expression value synchronously (`get_runtime_expression_value`) or asynchronously (`snapshot_create`, `snapshot_status` and `snapshot_get_values`) |
-| How long does operation X take? | Execution duration (`get_runtime_execution_duration`) |
-| How often does line X run? | Execution count (`get_runtime_execution_count`) |
-| What range of values does X take over time? | Distribution / numeric metric (`get_runtime_numeric_metric`) |
+| What is the current value of X? | Snapshot expression capture (`lightrun__snapshot_create`, `lightrun__snapshot_status`, and `lightrun__snapshot_get_values`) |
+| How long does operation X take? | Execution duration (`lightrun__get_runtime_execution_duration`) |
+| How often does line X run? | Execution count (`lightrun__get_runtime_execution_count`) |
+| What range of values does X take over time? | Distribution / numeric metric (`lightrun__get_runtime_numeric_metric`) |
 
 ### 3. Locate the relevant code
 
@@ -55,16 +55,9 @@ Useful signals by question type:
 
 ### 4. Select the agent pool and agents
 
-Depending on the version of the Lightrun MCP available, use one of the following approaches:
+Call `lightrun__get_runtime_sources` to retrieve all agent pools, each with their agents, tags, and custom sources in one response.
 
-**Option A — single step** (if `get_runtime_sources` is available):
-Call `get_runtime_sources` to retrieve all agent pools, each with their agents and tags in one response.
-
-**Option B — two steps** (if `get_runtime_sources_agent_pools` and `get_runtime_sources_agents` are available):
-1. Call `get_runtime_sources_agent_pools` to get the list of active agent pools
-2. Call `get_runtime_sources_agents` with the selected pool to retrieve its agents and tags — use the available filters to avoid fetching more than needed
-
-In both cases, apply the same selection logic:
+Apply this selection logic:
 - Select the pool and agents that correspond to the service in question
 - If multiple pools are plausible, present the list to the user and ask which to use
 - Prefer agents actively serving traffic relevant to the question (e.g. for a US-specific question, prefer agents handling US requests if identifiable)
@@ -93,7 +86,7 @@ Interpret the returned data in the context of the user's question:
 |---|---|
 | No agent pools found | Inform the user; ask them to verify the service is running and connected to Lightrun |
 | Multiple plausible agent pools | Present the list to the user and ask which to use |
-| Multiple plausible agents within a pool | Where Option B is available, use `get_runtime_sources_agents` filters to narrow down; if still ambiguous, ask the user |
+| Multiple plausible agents within a pool | Use the agents, tags, and custom sources returned by `lightrun__get_runtime_sources` to narrow down; if still ambiguous, ask the user |
 | Tool returns no data | Retry with a longer sampling window; if still empty, consider whether the code path is being actively exercised |
 | Line cannot be instrumented | Try an adjacent line; if still unavailable, explain the limitation to the user |
 | Code location unclear | Ask the user before proceeding — do not guess |
