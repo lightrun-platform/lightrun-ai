@@ -4,9 +4,10 @@ description: >-
   Answer questions about live production system behavior — current variable
   values, execution durations, hit counts, and value distributions — by
   instrumenting running services with Lightrun MCP tools. Use when the question
-  requires live runtime data rather than static code analysis (e.g. "how many
-  connections are in the pool?", "how long does X take?", "is this list ever
-  empty in production?", "which branch runs for customer X?").
+  requires live runtime data rather than static code analysis (e.g. "show
+  recent requests to this endpoint", "show the runtime distribution for this
+  operation", "what values appear for this expression in production?", "which
+  branch runs for customer X?").
 ---
 
 # Ask Prod
@@ -29,6 +30,8 @@ Read the user's question and identify:
 - What value, behavior, or measurement is being asked about
 - Which service or component is likely involved
 - Whether the question requires a single data point or a combination of capabilities
+- What runtime source scope is needed: one agent, multiple agents, a tag, a custom source, a region, or a customer-specific traffic path
+- Whether the answer requires a short collection window or a longer observation window
 
 ### 2. Identify the right capability
 
@@ -46,7 +49,7 @@ Select the Lightrun capability that best fits the question. More than one may be
 Before calling any tool, identify the specific **file path** and **line number** that will yield the needed information.
 
 Useful signals by question type:
-- **Current values** (e.g. pool size, logged-in users): find the field or variable on the relevant object, at the point it is read or returned
+- **Current values** (e.g. cache size, selected instance state): find the field or variable on the relevant object, at the point it is read or returned
 - **Durations**: identify the start and end lines of the relevant code section
 - **Request/response examples**: find where the request is parsed or the response is constructed
 - **Branch behavior**: locate the conditional and the variables that determine which path runs
@@ -58,17 +61,28 @@ Useful signals by question type:
 Call `get_runtime_sources` to retrieve all agent pools, each with their agents, tags, and custom sources in one response.
 
 Apply this selection logic:
-- Select the pool and agents that correspond to the service in question
-- If multiple pools are plausible, present the list to the user and ask which to use
-- Prefer agents actively serving traffic relevant to the question (e.g. for a US-specific question, prefer agents handling US requests if identifiable)
-- If the right agents are still ambiguous, present the options to the user and ask which to use
+- Select the runtime source scope that corresponds to the service and question
+- Use a specific agent when the question is about one known instance
+- Use multiple agents when the answer should compare behavior across selected instances
+- Use a tag or custom source when the answer should cover a service, environment, region, tenant group, or another shared runtime scope
+- If multiple pools or source scopes are plausible, present the list to the user and ask which to use
+- Prefer sources actively serving traffic relevant to the question (e.g. for a US-specific question, prefer sources handling US requests if identifiable)
+- If the right source scope is still ambiguous, present the options to the user and ask which to use
+
+> Do not present a single-instance result as a global production answer. When full coverage is not available, describe the observed scope explicitly.
 
 ### 5. Collect runtime data
 
 Call the appropriate Lightrun tool with:
 - The file path and line number from step 3
-- The selected agent(s) from step 4
-- A sampling window — **default to 60 seconds**; extend to 5 minutes if the operation is infrequent or the first attempt returns no data
+- The selected source scope from step 4
+- An observation window that matches the question
+
+Use runtime actions for evidence collection:
+- If the user expects the code path to run quickly, wait briefly for results in the current session
+- If the expected signal needs a longer or uncertain observation window, keep the action active and explain when to check the result
+- Track action IDs and check action status before creating duplicate actions for the same question
+- Cancel actions that are no longer needed, or explain why an action remains active
 
 ### 6. Analyse and answer
 
@@ -76,6 +90,8 @@ Interpret the returned data in the context of the user's question:
 - Translate raw values into a plain-language answer
 - If a distribution was collected, summarise the range, typical value, and any notable outliers
 - If multiple capabilities were used, synthesise the results into a single coherent answer
+- For count-style questions across multiple instances, aggregate only the selected sources and state the source coverage
+- Include the runtime sources covered, collection window, and limits of the result
 - If the data is ambiguous or insufficient, say so clearly and suggest what additional instrumentation might help
 
 ---
@@ -87,7 +103,9 @@ Interpret the returned data in the context of the user's question:
 | No agent pools found | Inform the user; ask them to verify the service is running and connected to Lightrun |
 | Multiple plausible agent pools | Present the list to the user and ask which to use |
 | Multiple plausible agents within a pool | Use the agents, tags, and custom sources returned by `get_runtime_sources` to narrow down; if still ambiguous, ask the user |
-| Tool returns no data | Retry with a longer sampling window; if still empty, consider whether the code path is being actively exercised |
+| A single source cannot answer a fleet-level question | Target a tag, custom source, or multiple agents that match the requested scope; if full coverage is unavailable, frame the answer in terms of selected sources |
+| Tool returns no data | Keep the action active for a longer observation window; if still empty, consider whether the code path is being actively exercised |
+| Longer observation window needed | State the observation window, action ID, selected source scope, signal being collected, and condition for checking results later |
 | Line cannot be instrumented | Try an adjacent line; if still unavailable, explain the limitation to the user |
 | Code location unclear | Ask the user before proceeding — do not guess |
 
@@ -95,12 +113,12 @@ Interpret the returned data in the context of the user's question:
 
 ## Example Questions This Skill Can Answer
 
-- How many available connections are in the DB connection pool?
-- How many users are currently logged into service X?
-- Give me an example of an HTTP request to our `POST /api/v1/users` endpoint
-- Give me an example of the response JSON from the external sales tax service
+- Show the current value of `cacheSize` in the selected production instances.
+- How many users are logged in across the selected production instances?
+- Show details of a few recent requests sent to `POST /api/v1/users`.
+- Show details of a few recent responses from the external sales tax service.
 - Is this cache key currently in use?
-- How long does it take to process an average trade request?
-- Is this list ever empty in production?
-- What values can this expression take when `varX` is true?
-- Which branch runs for customer X?
+- Show the runtime distribution for trade requests coming in now.
+- Let me know if this list is empty in production during the next 24 hours.
+- What values are showing up in production for this expression when `varX` is true?
+- Which branch of `calculateDiscount` runs for customer X?
