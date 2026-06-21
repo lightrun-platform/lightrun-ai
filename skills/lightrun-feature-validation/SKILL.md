@@ -32,24 +32,32 @@ This skill is NOT for debugging a broken feature or incident response. For that,
 - OAuth authorization for Lightrun MCP is completed before runtime capture.
 - Supported runtimes: Java, .NET, Node.js, Python 3.11 (not later versions).
 
+# MCP Tool Discovery
+
+Follow [MCP tool discovery](references/mcp-tool-discovery.md). Read MCP tool schemas and descriptions at run time; do not assume fixed tool names or client prefixes.
+
 # MCP Preflight
 
-- Required gate tool: `lightrun__get_runtime_sources`
-- Pass criteria:
-  - At least one valid agent pool is returned.
-  - A concrete target is selected: `agentNames`, `customSourceName`, or `tagNames`.
-- Fail criteria:
-  - Tool is unavailable, call fails, or source list is empty.
+Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery.md) before any runtime evidence capture.
+
+- Pass and fail criteria: see [Source discovery (preflight)](references/mcp-tool-discovery.md#source-discovery-preflight).
+- Missing-MCP recovery: see [Missing-MCP recovery](references/mcp-tool-discovery.md#missing-mcp-recovery).
 
 # Missing-MCP Recovery
 
-1. Classify failure: missing tool, runtime call error, or empty source list.
-2. Instruct remediation:
-   - Install/enable Lightrun MCP.
-   - Complete MCP OAuth authorization.
-   - Verify access to the expected environment/agent pool.
-3. Re-run `lightrun__get_runtime_sources`.
-4. Continue after preflight success.
+Use [Missing-MCP recovery](references/mcp-tool-discovery.md#missing-mcp-recovery). Continue only after preflight pass criteria are met.
+
+# Runtime Tool Selection Strategy
+
+- At run start, inspect currently exposed Lightrun runtime tools and their descriptions before selecting a capture path.
+- Choose the smallest useful evidence capability for the feature question:
+  - expression/value capture for object, field, request, response, and branch-state questions;
+  - execution count for "does this run / how often" questions;
+  - numeric metric or distribution capture for runtime value ranges;
+  - execution duration for latency questions.
+- Record the selected tool identifier exactly as exposed by MCP.
+- Before each action, state what design or validation decision this action can change.
+- Re-check currently exposed runtime tools when resuming a later run, and adapt the capture path if available capabilities changed.
 
 # Question Intake
 
@@ -169,12 +177,12 @@ Default output path: `~/Downloads/<ServiceName>/<YYYY-MM-DD>/`
 
 # Async Activation Gate
 
-Use synchronous capture first. Switch to async when:
+Use a same-run capture capability discovered from the current MCP tool list first. Switch to async when:
 - Two consecutive synchronous attempts return no hits on a correctly targeted location.
 - The user cannot reproduce the traffic condition in the current session.
 
 When switching to async:
-- Create the async action, record the action ID.
+- Create the async action using the exact exposed MCP identifier and record the action ID.
 - Provide exact reproduction instructions and the active collection window.
 - Pause until the next session; resume by checking existing action IDs before creating new ones.
 
@@ -189,25 +197,26 @@ Before ending the session:
 
 1. Collect question, observation target, condition, and environment. Ask for missing fields.
 2. Detect mode: design or validation.
-3. Run preflight: `lightrun__get_runtime_sources`. Select source target.
-4. Detect runtime from source files.
-5. Explore codebase: trace call path, find valid observation point.
-6. Construct condition expression using language-specific constraint rules.
-7. Place Lightrun action at the selected location.
-8. Ask user to trigger traffic matching the condition (or confirm it flows naturally).
-9. If no hits, check whether traffic is region/pod-specific. Suggest switching pod before changing instrumentation.
-10. Apply async gate if synchronous capture misses twice across pods.
-11. On hit: retrieve data, reassemble if chunked, decompress if needed.
-12. Design mode: summarize findings as a reference snapshot.
+3. Inspect currently exposed Lightrun runtime tools and select the capture capability that fits the question.
+4. Complete source discovery preflight using read-only discovery capabilities. Select source target.
+5. Detect runtime from source files.
+6. Explore codebase: trace call path, find valid observation point.
+7. Construct condition expression using language-specific constraint rules.
+8. Place Lightrun action at the selected location using the exact MCP-exposed tool identifier.
+9. Ask user to trigger traffic matching the condition (or confirm it flows naturally).
+10. If no hits, check whether traffic is region/pod-specific. Suggest switching pod before changing instrumentation.
+11. Apply async gate if synchronous capture misses twice across pods.
+12. On hit: retrieve data, reassemble if chunked, decompress if needed.
+13. Design mode: summarize findings as a reference snapshot.
     Validation mode: compare against expected value, report MATCH or MISMATCH with diff.
-13. Save to output path with descriptive filename.
-14. Run cleanup gate: cancel unneeded actions.
-15. Report: file path, mode, verdict (validation) or summary (design), any remaining unknowns.
+14. Save to output path with descriptive filename.
+15. Run cleanup gate: cancel unneeded actions.
+16. Report: file path, mode, verdict (validation) or summary (design), any remaining unknowns.
 
 # Output Contract
 
 - **Mode declared**: design or validation
-- **Preflight pass**: selected source target + first planned action
+- **Preflight pass**: selected source target + source-selection reasoning + first planned action with exact MCP-exposed identifier
 - **Preflight fail**: blocker category + exact remediation + retry condition
 - **Observation point selected**: file, line number, variable name, runtime, constraint notes
 - **Condition constructed**: the exact expression string placed on the action
@@ -220,7 +229,10 @@ Before ending the session:
 
 - [ ] Question and mode (design/validation) established before any codebase exploration.
 - [ ] Expected value collected if validation mode.
-- [ ] `lightrun__get_runtime_sources` runs before any runtime evidence tool.
+- [ ] Source discovery completed before any runtime evidence tool.
+- [ ] Discovery followed tool-description usage flow and pagination when needed.
+- [ ] Preflight produced `agentPoolName` plus selector required by the first evidence tool.
+- [ ] Selected runtime tool identifier matches the MCP-exposed name exactly.
 - [ ] Runtime detected from source files and stated explicitly.
 - [ ] Observation point validated: typed local variable, executable line, correct code path.
 - [ ] Expression constructed using only allowed constructs for the detected runtime.
