@@ -1,0 +1,15 @@
+interface:
+  display_name: "Lightrun Feature Validation"
+  short_description: "Capture real runtime data to design or validate a new feature before writing or merging code"
+  icon_small: "./assets/lightrun-small.svg"
+  icon_large: "./assets/lightrun.png"
+  brand_color: "#0078D4"
+  default_prompt: "Use $lightrun-feature-validation to capture real production data for feature design or validation. Collect the question to answer, observation target, condition, and environment. Detect mode (design or validation), run preflight, find a valid observation point, capture the data, and report findings or a match/mismatch verdict."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "lightrun"
+      description: "Lightrun MCP server"
+      transport: "streamable_http"
+      url: "https://app.lightrun.com/mcp"
