@@ -14,6 +14,10 @@ description: >-
 
 Query live production runtime to answer questions about system behavior using Lightrun's observability tools.
 
+## MCP Tool Discovery
+
+Follow [MCP tool discovery](references/mcp-tool-discovery.md). Read MCP tool schemas and descriptions at run time; do not assume fixed tool names or client prefixes.
+
 ## Prerequisites
 
 - Lightrun MCP installed and active
@@ -39,10 +43,10 @@ Select the Lightrun capability that best fits the question. More than one may be
 
 | If the question asks... | Use... |
 |---|---|
-| What is the current value of X? | Snapshot expression capture (`snapshot_create`, `snapshot_status`, and `snapshot_get_values`) |
-| How long does operation X take? | Execution duration (`get_runtime_execution_duration`) |
-| How often does line X run? | Execution count (`get_runtime_execution_count`) |
-| What range of values does X take over time? | Distribution / numeric metric (`get_runtime_numeric_metric`) |
+| What is the current value of X? | Snapshot/expression capture capability discovered from the currently exposed MCP tools |
+| How long does operation X take? | Execution duration capability discovered from the currently exposed MCP tools |
+| How often does line X run? | Execution count capability discovered from the currently exposed MCP tools |
+| What range of values does X take over time? | Distribution / numeric metric capability discovered from the currently exposed MCP tools |
 
 ### 3. Locate the relevant code
 
@@ -58,7 +62,7 @@ Useful signals by question type:
 
 ### 4. Select the agent pool and agents
 
-Call `get_runtime_sources` to retrieve all agent pools, each with their agents, tags, and custom sources in one response.
+Complete source discovery using read-only discovery tools (see [Source discovery (preflight)](references/mcp-tool-discovery.md#source-discovery-preflight)). Follow tool-description usage flow and pagination when the pool or agent list is large.
 
 Apply this selection logic:
 - Select the runtime source scope that corresponds to the service and question
@@ -102,7 +106,7 @@ Interpret the returned data in the context of the user's question:
 |---|---|
 | No agent pools found | Inform the user; ask them to verify the service is running and connected to Lightrun |
 | Multiple plausible agent pools | Present the list to the user and ask which to use |
-| Multiple plausible agents within a pool | Use the agents, tags, and custom sources returned by `get_runtime_sources` to narrow down; if still ambiguous, ask the user |
+| Multiple plausible agents within a pool | Use agents, tags, and metadata from source discovery to narrow down; if still ambiguous, ask the user |
 | A single source cannot answer a fleet-level question | Target a tag, custom source, or multiple agents that match the requested scope; if full coverage is unavailable, frame the answer in terms of selected sources |
 | Tool returns no data | Keep the action active for a longer observation window; if still empty, consider whether the code path is being actively exercised |
 | Longer observation window needed | State the observation window, action ID, selected source scope, signal being collected, and condition for checking results later |
