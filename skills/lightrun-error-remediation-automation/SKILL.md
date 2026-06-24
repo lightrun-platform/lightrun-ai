@@ -39,42 +39,33 @@ This skill requires saving small investigation state (e.g., problem IDs, hypothe
 ### Automation and portability
 This skill may run unattended and with different coding agents. Do not rely on agent-specific directories, local files, user-home directories, or interactive prompts for storage, source-selection, or reproduction decisions. Use approved durable persistent storage only: a Memories/Memory MCP, Cursor `AutomationMemory`, an equivalent agent-native durable automation memory, or another connected persistent store. If required input is unavailable, return a machine-readable blocker with an explicit retry condition instead of asking the user.
 
+# MCP Tool Discovery
+
+Follow [MCP tool discovery](references/mcp-tool-discovery.md). Do not assume fixed tool names or client prefixes.
+
 # MCP Preflight
 
-- Required gate tool:
-  - `get_runtime_sources`
-- Pass criteria:
-  - At least one valid agent pool is returned.
-  - A concrete target is selected: `agentNames` or `customSourceName` or `tagNames`.
-- Fail criteria:
-  - Tool is unavailable, call fails, or source list is empty.
+Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery.md) before any runtime evidence capture.
 
-# Missing-MCP Recovery
-
-1. Classify failure: missing tool, runtime call error, or empty source list.
-2. Instruct remediation:
-   - Install/enable Lightrun MCP.
-   - Complete MCP OAuth authorization.
-   - Verify access to the expected environment/agent pool.
-3. Re-run `get_runtime_sources`.
-4. Continue investigation after preflight success.
+- Pass and fail criteria: see [Source discovery (preflight)](references/mcp-tool-discovery.md#source-discovery-preflight).
+- Missing-MCP recovery: see [Missing-MCP recovery](references/mcp-tool-discovery.md#missing-mcp-recovery).
 
 # Resume Criteria
 
-- Resume the investigation after `get_runtime_sources` returns valid sources.
-- Runtime evidence tools are activated after preflight success.
+- Resume the investigation after preflight pass criteria are met.
+- Runtime evidence tools are activated only after preflight success.
+- Re-enumerate exposed Lightrun MCP tools when resuming a later run.
 
 # Runtime Tool Selection Strategy
 
-- Keep preflight fixed on `get_runtime_sources`.
+- At run start, inspect currently exposed Lightrun runtime tools and their descriptions before selecting an evidence path.
 - For evidence collection, explore available Lightrun MCP tools and their descriptions, then select the best-fit async tool for each hypothesis signal.
 - Record the selected tool identifier exactly as exposed by MCP.
 - Prefer the smallest useful set of tools for each investigation step.
 
 # Source Selection Confidence
 
-- First evaluate candidate agent/tag/custom-source options and choose the best-fit target when confidence is sufficient.
-- If several targets can fit, select one or multiple strongest candidates using explicit reasoning (service ownership, environment match, and expected trigger path).
+- Apply [Source selection guidance](references/mcp-tool-discovery.md#source-selection-guidance).
 - Choose the most appropriate option automatically when confidence remains low but a defensible target exists; if no defensible target can be selected without guessing, return `runtime-source-ambiguous` with an explicit retry condition.
 
 # Investigation Principles
@@ -254,7 +245,7 @@ Investigation template:
    - Tools: none
    - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
 5. Run preflight and select a target source.
-   - Tools: `get_runtime_sources`
+   - Tools: source-discovery capabilities (see MCP Tool Discovery)
    - Success: one or multiple source targets are selected and justified by agent reasoning without interactive clarification, or `runtime-source-ambiguous` is returned with an explicit retry condition.
 6. Map full codepath and choose triggerable evidence points.
    - Tools: none
@@ -274,6 +265,7 @@ Investigation template:
 
 - Preflight pass:
   - selected source target(s) (`agentPoolName` + selector mode(s))
+  - source-selection reasoning and pagination/filter note (if used)
   - next runtime action (first evidence tool and why)
 - Preflight fail:
   - blocker category
@@ -312,7 +304,9 @@ Investigation template:
 
 # Runtime Quality Checklist
 
-- [ ] `get_runtime_sources` appears before any runtime evidence tool.
+- [ ] Source discovery completed before any runtime evidence tool.
+- [ ] Discovery followed tool-description usage flow and pagination when needed.
+- [ ] Preflight produced `agentPoolName` plus selector required by the first evidence tool.
 - [ ] For each selected runtime tool, the identifier matches the MCP-exposed name exactly.
 - [ ] Evidence tool selection references MCP tool descriptions and hypothesis fit.
 - [ ] Missing-MCP recovery includes MCP install + OAuth authorization + retry.
