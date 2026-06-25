@@ -1,0 +1,15 @@
+interface:
+  display_name: "Lightrun Runtime-Aware PR Review"
+  short_description: "Review a pull request using live runtime evidence and diff-aware risk analysis"
+  icon_small: "./assets/lightrun-small.svg"
+  icon_large: "./assets/lightrun.png"
+  brand_color: "#0078D4"
+  default_prompt: "Use $lightrun-runtime-aware-pr-review to review a pull request with scoped diff analysis, Lightrun historical and live runtime evidence, patch simulation, handoff/resume when traffic is cold, and a clear merge recommendation."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "lightrun"
+      description: "Lightrun MCP server"
+      transport: "streamable_http"
+      url: "https://app.lightrun.com/mcp"
