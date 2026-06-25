@@ -133,6 +133,8 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
    - Content: action IDs, capture line list rows, exact trigger steps, expected expressions, `resume pr-<number> review`.
    - Keep live actions **RUNNING** through closeout when Evidence is `HISTORICAL`; cancel only after this section is emitted or user opts out.
 
+   Assign **Runtime confidence** and **Confidence reason** per [output contract](references/output-contract.md#runtime-confidence) from Evidence, **RUNTIME**-row hit counts, and patch-simulation outcome.
+
    Emit one review block; merge recommendation per Output Contract rubric.
    On `STATIC_ONLY_COMPLETE`, cancel persisted actions via **Async lifecycle** cancel capability unless user asks to keep them.
 
@@ -154,7 +156,7 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 
 # Output Contract
 
-Follow the [output contract](references/output-contract.md) for terminal states, merge recommendation rubric, runtime verdict values, and output templates (handoff block and complete review).
+Follow the [output contract](references/output-contract.md) for terminal states, merge recommendation rubric, runtime verdict, evidence labels, runtime confidence, and output templates (handoff block and complete review).
 
 # Examples
 

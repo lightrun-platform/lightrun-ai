@@ -12,6 +12,8 @@ PR tightens validation on `POST /api/v1/checkout`. Snapshot on `PaymentService.j
 **Terminal state:** RUNTIME_COMPLETE
 **Runtime verdict:** CONFIRMED_ON_RUNTIME_SAMPLES
 **Evidence:** LIVE_AND_HISTORICAL
+**Runtime confidence:** Strong
+**Confidence reason:** 12 historical + 3 qualifying live hits on changed logic; patch simulation UNCHANGED.
 
 ### Patch simulation
 | Inputs | Baseline | PR head | Outcome |
@@ -57,6 +59,8 @@ Frontend form fix + backend role list alignment. Historical 0 on authority paths
 **Terminal state:** STATIC_ONLY_COMPLETE
 **Runtime verdict:** RUNTIME_NOT_USED
 **Evidence:** NO_RUNTIME_TRAFFIC
+**Runtime confidence:** Insufficient
+**Confidence reason:** Zero hits on capture line list; closeout via `static only` and SCENARIO tests.
 
 ### Scenario analysis (SCENARIO)
 | Inputs | Baseline | PR head | Outcome |
@@ -73,6 +77,8 @@ New property `billing.export.include-metadata` defaults `true`. Historical hits 
 **Terminal state:** RUNTIME_COMPLETE
 **Runtime verdict:** CONFIRMED_ON_RUNTIME_SAMPLES
 **Evidence:** HISTORICAL
+**Runtime confidence:** Moderate
+**Confidence reason:** 8 historical RUNTIME-row hits on invoice PDF path; 0 qualifying live hits this session.
 
 ### Patch simulation
 | Inputs | Baseline | PR head (default) | PR head (opt-in) | Outcome |

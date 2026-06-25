@@ -42,12 +42,27 @@ When valid target existed but no hits after trigger + resume + `static only`: no
 
 Same-line hits with different inputs (e.g. `agent.zip` vs `plugin.vsix` at the same line) supply context only — label those rows **context**, not **RUNTIME**, unless inputs match the hypothesis.
 
+## Runtime confidence
+
+Synthesizes **Evidence**, branch-matrix **RUNTIME**-row hit counts, and patch-simulation outcome — not a separate evidence source. Assign the highest matching row; do not use numeric scores.
+
+| Confidence | When |
+|------------|------|
+| **Strong** | `LIVE_AND_HISTORICAL`; ≥3 qualifying live hits on primary **RUNTIME** row(s); patch simulation **UNCHANGED** or **IMPROVEMENT** on hypothesis inputs at default config |
+| **Moderate** | `HISTORICAL` with ≥3 **RUNTIME**-row hits on changed logic; OR qualifying `LIVE` with ≥3 hits but no historical; patch simulation supports the merge hypothesis |
+| **Weak** | <3 **RUNTIME**-row hits on primary path; qualifying live only on **context** rows; primary path **SCENARIO**-only (tests cover hypothesis); or material opt-in branch unverified in runtime |
+| **Insufficient** | All capture rows 0/0; `RUNTIME_PENDING_HANDOFF`; `NO_RUNTIME_TRAFFIC`; `RUNTIME_NOT_USED` |
+
+**Confidence reason:** one sentence citing the decisive signal (e.g. hit counts on **RUNTIME** vs **context** rows, Evidence label, patch-simulation label).
+
 ## Handoff block (Phase 1)
 
 ```markdown
 ## Review paused — awaiting runtime trigger
 
 **Terminal state:** RUNTIME_PENDING_HANDOFF
+**Runtime confidence:** Insufficient
+**Confidence reason:** 0 hits on capture line list after collection window — trigger required.
 **Correlation key:** pr-<number>-review
 **Action IDs:** <id1>, <id2>  (max 2)
 **MCP:** historical=<server> live=<server> / <pool> / <selector>
@@ -76,6 +91,8 @@ Emit once. Include merge recommendation line.
 **Terminal state:** RUNTIME_COMPLETE | RESUMED_RUNTIME_ACTION | STATIC_ONLY_COMPLETE
 **Runtime verdict:** CONFIRMED_ON_RUNTIME_SAMPLES | RISK_ON_RUNTIME_SAMPLES | RUNTIME_NOT_USED
 **Evidence:** LIVE | HISTORICAL | LIVE_AND_HISTORICAL | NO_RUNTIME_TRAFFIC — see [Evidence labels](#evidence-labels); live labels require inputs matching the regression hypothesis
+**Runtime confidence:** Strong | Moderate | Weak | Insufficient — see [Runtime confidence](#runtime-confidence)
+**Confidence reason:** <one sentence>
 **Review scope:** focused | full-branch
 **MCP:** historical=<server> live=<server>
 **Baseline:** <base> → <head>
