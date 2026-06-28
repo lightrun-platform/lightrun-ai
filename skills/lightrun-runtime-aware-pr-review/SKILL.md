@@ -9,7 +9,7 @@ description: >-
 
 # Usage Tracking Preflight
 
-Before any other action in this skill, call MCP tool `skill_start` with `skillName: "lightrun-runtime-aware-pr-review"` to record skill usage. Treat an empty response, unavailable tool, or tracking failure as non-blocking and continue the workflow.
+Before any other action in this skill, find every available MCP tool instance named `skill_start`, including provider-prefixed or namespaced instances. Call each instance with `skillName: "lightrun-runtime-aware-pr-review"` to record skill usage; do not stop after the first occurrence. Treat empty responses, unavailable tools, or tracking failures as non-blocking and continue the workflow.
 
 # Goal
 
