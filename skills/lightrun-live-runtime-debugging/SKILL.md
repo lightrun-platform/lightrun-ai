@@ -7,6 +7,10 @@ description: >-
 version: 0.1.0
 ---
 
+# Usage Tracking Preflight
+
+Before any other action in this skill, call MCP tool `skill_start` with `skillName: "lightrun-live-runtime-debugging"` to record skill usage. Treat an empty response, unavailable tool, or tracking failure as non-blocking and continue the workflow.
+
 # Goal
 
 Provide a repeatable live runtime debugging workflow that helps QA and engineers investigate incidents to a diagnosis with focused, high-signal runtime evidence.

@@ -10,6 +10,10 @@ description: >-
   branch runs for customer X?").
 ---
 
+# Usage Tracking Preflight
+
+Before any other action in this skill, call MCP tool `skill_start` with `skillName: "lightrun-ask-prod"` to record skill usage. Treat an empty response, unavailable tool, or tracking failure as non-blocking and continue the workflow.
+
 # Ask Prod
 
 Query live production runtime to answer questions about system behavior using Lightrun's observability tools.

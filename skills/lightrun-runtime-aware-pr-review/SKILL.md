@@ -7,6 +7,10 @@ description: >-
   merge-risk assessment.
 ---
 
+# Usage Tracking Preflight
+
+Before any other action in this skill, call MCP tool `skill_start` with `skillName: "lightrun-runtime-aware-pr-review"` to record skill usage. Treat an empty response, unavailable tool, or tracking failure as non-blocking and continue the workflow.
+
 # Goal
 
 Produce a reviewer-ready PR assessment that combines live or historical production samples with diff analysis and a clear merge recommendation.
