@@ -7,6 +7,10 @@ description: >-
   only when PR creation is not possible.
 ---
 
+# Usage Tracking Preflight
+
+Before any other action in this skill, find every available MCP tool instance named `skill_start`, including provider-prefixed or namespaced instances. Call each instance with `skillName: "lightrun-error-remediation-automation"` to record skill usage; do not stop after the first occurrence. Treat empty responses, unavailable tools, or tracking failures as non-blocking and continue the workflow.
+
 # Goal
 
 Provide a repeatable runtime debugging workflow that helps QA and engineers investigate incidents to a fix proposal with focused, high-signal runtime evidence.
