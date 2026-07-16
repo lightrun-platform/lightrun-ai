@@ -180,81 +180,13 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 
 # Quick Use Guide
 
-Use this skill in the following sequence:
-
-1. Define the investigation question in one sentence.
-2. List top hypotheses and the signal expected for each.
-3. Inspect currently exposed runtime tools and choose the evidence path that best fits the hypotheses and available capabilities.
-4. Run preflight and pick runtime source target.
-5. Apply async activation gate after failed sync evidence cycles.
-6. Update hypothesis status after each retrieved signal.
-7. Publish diagnosis, confidence, and next best action, or reproduction-required handoff (async mode only).
-
-Investigation template:
-
-- Question:
-- Impact:
-- Hypotheses:
-  - H1:
-    - Confirms when:
-    - Weakens when:
-  - H2:
-    - Confirms when:
-    - Weakens when:
-- Selected runtime target:
-- Signals collected:
-- Leading diagnosis:
-- Confidence:
-- Next action:
-
-# Flow
-
-1. Frame the investigation problem.
-   - Tools: none
-   - Success: symptom, impact, expected behavior, and investigation question are explicit.
-2. Create a hypothesis matrix.
-   - Tools: none
-   - Success: at least 2 plausible hypotheses are listed, each with a planned confirming and falsifying signal.
-   - Each hypothesis must include: what request/state would make this failure unexpected.
-3. Inspect currently exposed runtime tools and choose the initial evidence path.
-   - Tools: none
-   - Success: selected path matches both investigation needs and currently exposed tool capabilities.
-4. Run preflight and select a target source.
-   - Tools: source-discovery capabilities (see MCP Tool Discovery)
-   - Success: one or multiple source targets are selected and justified by agent reasoning, with user clarification only when confidence remains low.
-5. Map full codepath and choose triggerable evidence points.
-   - Tools: none
-   - Success: full assumed bug codepath is explored, and action points are placed on executable lines likely to trigger in reproduction.
-6. Execute focused same-run evidence steps per hypothesis when immediate capture is feasible.
-   - Tools: choose from currently available Lightrun MCP runtime tools based on their descriptions and fit to the active hypothesis.
-   - Success: each evidence step is mapped to one hypothesis, changes or preserves a specific decision, and either strengthens or weakens it.
-7. Apply async activation gate.
-   - Tools: none
-   - Success: choose synchronous continuation or asynchronous capture with later resume explicitly; switch to async no later than the second consecutive no-hit/timeout on same codepath.
-8. If same-run evidence is insufficient due to longer/uncertain reproduction window, switch to async branch when matching capabilities are currently exposed.
-   - Tools: async action creation/status/data retrieval/cancel capabilities, discovered from current MCP tool list.
-   - Success: async action IDs are created or resumed only for hypotheses that require delayed evidence.
-9. In async branch, run bounded in-session status polling after async action creation.
-   - Tools: async status/getter tools.
-   - Success: if hits arrive within the in-session polling budget, retrieve them and continue investigation in this run; otherwise proceed to later-resume handoff.
-10. In async branch, resume existing async actions before creating new ones.
-   - Tools: async status/getter tools for existing action IDs.
-   - Success: existing action outcomes are incorporated, duplicate action creation is avoided.
-11. Ask for issue reproduction within action window (when async branch is active and bounded in-session polling had no usable results).
-   - Tools: none
-   - Success: user receives clear reproduction instructions and timing window while runtime actions are active.
-12. Iterate investigation loop.
-   - Tools: same minimal subset as steps 6-10, depending on active branch
-   - Success: repeat capture and assessment until one leading hypothesis remains, or all hypotheses are inconclusive, including timeout/source mitigation when captures fail; reproduced-no-hit loops must include retargeting before next repro request.
-13. Synthesize diagnosis and confidence.
-   - Tools: none
-   - Success: findings differentiate facts from inference, ruled-out hypotheses are explicit, and uncertainty is bounded.
-14. Run mandatory runtime action cleanup gate.
-   - Tools: async status/cancel capabilities when relevant.
-   - Success: each investigation-owned action is marked cancelled/retained/already-terminal, and cancellations are applied when required.
-15. Produce decision-ready handoff with next actions.
-   - Tools: none
-   - Success: output contract is fully populated with diagnosis quality fields and concrete fix proposal details.
+1. Define the investigation question, impact, and expected behavior.
+2. Rank the smallest plausible hypothesis set and the signal that would strengthen or weaken each hypothesis.
+3. Inspect exposed runtime tools, complete preflight, and select the best-fit source and evidence path.
+4. Collect only evidence that can change a diagnosis decision; update the hypothesis ranking after each result.
+5. Apply the async activation gate when immediate capture is insufficient.
+6. Iterate until evidence supports one diagnosis or the remaining hypotheses are inconclusive.
+7. Run cleanup and return the applicable handoff from the output contract.
 
 # Output Contract
 
