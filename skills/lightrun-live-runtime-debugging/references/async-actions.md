@@ -6,19 +6,18 @@
   - check async action status by action ID,
   - retrieve captured values and/or call stack when new hits are available,
   - cancel async action when it is no longer needed.
-- At action creation time, persist: `actionId`, hypothesis ID, source target, code location, purpose, creation time, max wait, last known status, last retrieved hit count.
-- For uncertain reproduction timing, use a long async window by default (recommended baseline: 1800-3600 seconds), then adjust only with explicit reason.
-- After creating an async action, perform bounded in-session status polling for a short but meaningful window.
-  - use a small polling budget (for example 60-90 seconds total in-session),
+- At action creation time, persist: `actionId`, hypothesis ID, source target, code location, purpose, creation time, max wait, last known status, and the last retrieved result marker when exposed.
+- Use the tool-default action duration unless another window has a concrete diagnostic benefit.
+- After creating an async action, poll for a bounded, task-appropriate in-session window.
   - if new hits arrive in this window, retrieve data immediately and continue investigation in the same run,
   - if no usable results arrive by budget end, keep action active and switch to reproduction-required handoff for later resume.
 - On each new skill run for the same investigation:
   - load persisted action IDs first,
   - call status first for each still-relevant action,
-  - retrieve data only when status hit count increased beyond previously retrieved count.
-- During bounded in-session polling, stop when status is terminal: `COMPLETED`, `FAILED`, `ERROR`, `TIMEOUT`, `CANCELLED`, or when the in-session polling budget is reached.
-- If status reaches terminal during bounded in-session polling and hit count increased since last getter call, perform one final getter call before closing the action outcome.
-- If status is still pending/running with no usable results by end of current run, return a handoff that includes:
+  - retrieve data only when the exposed schema indicates new evidence is available.
+- Follow status and result-availability semantics from the exposed schemas; do not assume universal status names.
+- Stop polling at a schema-defined terminal state or when the in-session bound is reached; retrieve newly available evidence before closing when supported.
+- If the action remains non-terminal with no usable results by end of current run, return a handoff that includes:
   - active action IDs,
   - exact reproduction steps,
   - retry condition for the next run.
