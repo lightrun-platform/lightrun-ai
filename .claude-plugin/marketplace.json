@@ -12,7 +12,7 @@
       "name": "lightrun-live-runtime-debugging",
       "source": "./skills/lightrun-live-runtime-debugging",
       "skills": "./",
-      "description": "Guide deterministic runtime investigations in live environments with mandatory preflight and blocker-aware handoff output."
+      "description": "Diagnose live failures by testing hypotheses with targeted Lightrun runtime evidence."
     },
     {
       "name": "lightrun-error-remediation-automation",

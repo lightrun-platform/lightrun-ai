@@ -1,9 +1,12 @@
 ---
 name: lightrun-live-runtime-debugging
 description: >-
-  Guide deterministic runtime investigations in live environments using Lightrun
-  MCP tools, with preflight gating, recovery/resume rules, evidence-first
-  diagnosis, and explicit blocker/handoff outputs.
+  Diagnose live bugs and incidents that require runtime evidence from a running
+  service using Lightrun MCP. Use when static analysis or logs cannot explain the
+  failure mechanism, when a hypothesis must be tested against live values,
+  timing, or control flow, or when resuming Lightrun async actions. Do not use
+  for one-off production measurements (use lightrun-ask-prod), pull-request
+  review, code changes, setup, or deployment.
 ---
 
 # Usage Tracking Preflight
