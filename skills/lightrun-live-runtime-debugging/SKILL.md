@@ -22,29 +22,13 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 - In scope: problem framing, hypothesis ranking, runtime evidence capture, hypothesis elimination, diagnosis confidence, blocker handling, and investigation handoff.
 - Out of scope: code changes, rollout decisions, or postmortem ownership.
 
-# MCP Tool Discovery
+# Runtime Preflight
 
-Follow [MCP tool discovery](references/mcp-tool-discovery.md). Do not assume fixed tool names or client prefixes.
+Before the first runtime capture, read [MCP tool discovery](references/mcp-tool-discovery.md) and complete its source-discovery preflight. Treat exposed tool schemas and descriptions as authoritative.
 
-# MCP Preflight
-
-Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery.md) before any runtime evidence capture.
-
-- Pass and fail criteria: see [Source discovery (preflight)](references/mcp-tool-discovery.md#source-discovery-preflight).
-- Missing-MCP recovery: see [Missing-MCP recovery](references/mcp-tool-discovery.md#missing-mcp-recovery).
-
-# Resume Criteria
-
-- Resume the investigation after preflight pass criteria are met.
-- Runtime evidence tools are activated only after preflight success.
-- For asynchronous runtime actions, resume by re-checking previously created action IDs before creating duplicate actions.
-- Re-enumerate exposed Lightrun MCP tools when resuming a later run.
-
-# Source Selection Confidence
-
-- Apply [Source selection guidance](references/mcp-tool-discovery.md#source-selection-guidance).
-- Ask the user for source clarification when confidence remains low after this evaluation.
-- When clarification is needed, present a short comparison of candidates and continue after the user selects the source.
+- If preflight fails, do not invoke capture tools; return the blocker, required remediation, and retry condition.
+- Select the strongest target from available metadata. Ask for clarification only when viable candidates remain indistinguishable.
+- On a later run, re-enumerate exposed tools and check inherited async action IDs before creating replacements.
 
 # Async Activation Gate
 
