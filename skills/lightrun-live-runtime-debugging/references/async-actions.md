@@ -21,4 +21,4 @@
   - active action IDs,
   - exact reproduction steps,
   - retry condition for the next run.
-- Cancel stale or no-longer-needed actions and record cleanup decision in handoff.
+- Apply the [runtime action cleanup](../SKILL.md#runtime-action-cleanup) rules only to actions created or explicitly inherited by this investigation.

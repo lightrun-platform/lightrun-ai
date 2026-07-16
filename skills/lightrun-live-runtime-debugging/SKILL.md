@@ -62,21 +62,15 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 
 When async mode is activated or existing action IDs are provided, read [Async runtime actions](references/async-actions.md) before creating, polling, retrieving, or cancelling actions.
 
-# Runtime Action Cleanup Gate
+# Runtime Action Cleanup
 
-- Cleanup review is mandatory before any final response in both same-run and async branches.
-- Maintain an investigation-owned action list for this run/session state, including each created action ID and its purpose.
-- Before final handoff, review each investigation-owned action and assign one of:
-  - `cancelled` (no longer needed),
-  - `retained` (still required for next reproduction window),
-  - `already terminal` (completed/failed/timeout/cancelled by system or prior run).
-- Cancel an investigation-owned action when:
-  - the mapped hypothesis is ruled out or already confirmed with sufficient evidence,
-  - the action is duplicate, stale, mistargeted, or replaced by a newer action,
-  - the investigation is complete and the action is no longer needed.
-- Retain an action only when a concrete next reproduction step depends on it; include retention reason and expected expiry window.
-- Do not cancel actions outside the investigation-owned action list.
-- Do not emit final handoff until cleanup review is complete and reported.
+Run cleanup only when this investigation created or explicitly inherited runtime actions.
+
+- Track each owned action ID and purpose.
+- Cancel an owned action when it is stale, duplicate, mistargeted, superseded, or no longer needed.
+- Retain an owned action only when a concrete next reproduction depends on it; record the reason and expected window.
+- Never cancel any other action.
+- Include each owned action's `cancelled`, `retained`, or terminal disposition in the handoff.
 
 # Tool Call Timing
 
