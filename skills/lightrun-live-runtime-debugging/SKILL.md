@@ -46,17 +46,6 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 - For asynchronous runtime actions, resume by re-checking previously created action IDs before creating duplicate actions.
 - Re-enumerate exposed Lightrun MCP tools when resuming a later run.
 
-# Runtime Tool Selection Strategy
-
-- At run start, inspect currently exposed Lightrun runtime tools and their descriptions before selecting an evidence path.
-- For evidence collection, select the best-fit tool set for each hypothesis signal based on both investigation needs and currently exposed capabilities.
-- Record the selected tool identifier exactly as exposed by MCP.
-- Before each action, state what decision this action can change.
-- If an action cannot change any diagnosis decision, do not run it.
-- After each action, reassess information gain and change strategy when gain is low for two consecutive actions.
-- Avoid repeating similar probes across many locations without new rationale.
-- Re-check currently exposed runtime tools when resuming a later run, and adapt the evidence path if available capabilities changed.
-
 # Source Selection Confidence
 
 - Apply [Source selection guidance](references/mcp-tool-discovery.md#source-selection-guidance).
