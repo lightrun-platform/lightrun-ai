@@ -22,12 +22,6 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 - In scope: problem framing, hypothesis ranking, runtime evidence capture, hypothesis elimination, diagnosis confidence, blocker handling, and investigation handoff.
 - Out of scope: code changes, rollout decisions, or postmortem ownership.
 
-# Preconditions
-
-- User can access the target service source path and line location.
-- Lightrun MCP server is installed and authenticated.
-- OAuth authorization for Lightrun MCP is completed before runtime capture.
-
 # MCP Tool Discovery
 
 Follow [MCP tool discovery](references/mcp-tool-discovery.md). Do not assume fixed tool names or client prefixes.
