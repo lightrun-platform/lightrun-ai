@@ -30,17 +30,9 @@ Before the first runtime capture, read [MCP tool discovery](references/mcp-tool-
 - Select the strongest target from available metadata. Ask for clarification only when viable candidates remain indistinguishable.
 - On a later run, re-enumerate exposed tools and check inherited async action IDs before creating replacements.
 
-# Async Activation Gate
+# Async Activation
 
-- Async mode is optional, but MUST be activated when either condition is met:
-  - two consecutive no-hit/timeout outcomes occur on correctly targeted synchronous runtime captures for the active hypothesis, or
-  - reproduction is not available in the current session window.
-- After the first failed synchronous cycle, force an explicit mode decision:
-  - continue with synchronous capture when user can reproduce now in-session,
-  - switch to asynchronous capture and pause investigation for resume in a later run when reproduction timing is uncertain or delayed.
-- Do not run more than 2 consecutive no-hit synchronous probes on the same codepath before switching to async mode.
-- When async mode is activated, create async action(s), persist action IDs, provide reproduction-required handoff, and stop active diagnosis until next run.
-- If reproducibility confidence is low or user-reported failure is intermittent, favor async in the first evidence cycle.
+Use async when reproduction is unavailable, uncertain, or intermittent, or after two consecutive no-hit/timeouts from correctly targeted synchronous captures on the active codepath. Prefer same-run capture when the user can reproduce now; after its first failure, decide whether to retarget synchronously or activate async.
 
 # Async Runtime Actions
 
@@ -56,16 +48,11 @@ Run cleanup only when this investigation created or explicitly inherited runtime
 - Never cancel any other action.
 - Include each owned action's `cancelled`, `retained`, or terminal disposition in the handoff.
 
-# Tool Call Timing
-
-- Use tool default collection timing unless the investigation clearly benefits from a different window.
-- Avoid adding extra timeout constraints to runtime tool calls during normal investigation flow.
-- When timing is adjusted, include a short reason describing the expected diagnostic benefit.
 # Investigation Efficiency
 
+- Use tool-default collection timing unless another window has a concrete diagnostic benefit.
 - Keep evidence collection focused on actions that can change diagnosis or next steps.
 - Once the bug mechanism is sufficiently confirmed for the current user-impact question, prefer synthesis and handoff over additional broad sampling.
-- Choose practical capture windows for the current goal; use longer waits only when the expected diagnostic value justifies it.
 
 # Action Error Mitigation
 
@@ -82,7 +69,7 @@ Run cleanup only when this investigation created or explicitly inherited runtime
 - Re-check source targeting after timeout/no-hit outcomes:
   - confirm selected source target(s) still match the suspected execution path,
   - ask the user to confirm source choice when confidence drops after failed captures.
-- For other action errors, consult the Lightrun troubleshooting guide and apply the most relevant remediation:
+- For action errors not covered above or by exposed tool guidance, consult the Lightrun troubleshooting guide:
   - https://docs.lightrun.com/troubleshooting/overview/
   - summarize which troubleshooting path was used and why it fits the observed error.
 - Log mitigation decisions in the handoff (what changed and why).
@@ -101,7 +88,6 @@ Run cleanup only when this investigation created or explicitly inherited runtime
   - behavioral change to implement
   - why this change addresses the observed mechanism
   - risk notes and validation checks
-- Use clear, specific language and avoid generic filler.
 
 # Quick Use Guide
 
