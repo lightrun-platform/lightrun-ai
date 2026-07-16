@@ -52,20 +52,6 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 - Ask the user for source clarification when confidence remains low after this evaluation.
 - When clarification is needed, present a short comparison of candidates and continue after the user selects the source.
 
-# Investigation Principles
-
-- Start with hypotheses first, then choose tools.
-- Capture evidence that can confirm or falsify a specific hypothesis.
-- Collect runtime evidence whenever feasible, even when a bug cause appears obvious.
-- For user-complaint investigations, evidence must explain whether the observed failure was expected or unexpected for a concrete request context.
-- Prefer regular (non-async) runtime tools for same-run investigation when they can produce required evidence in the current session.
-- Use asynchronous runtime actions only when the expected signal likely needs a longer or uncertain reproduction window.
-- When async actions are used, treat them as investigation state that can span multiple skill runs.
-- Do not issue final diagnosis while required async actions are still pending/running without checking status and available results first.
-- Prefer eliminating wrong hypotheses quickly over collecting broad low-signal data.
-- End with a diagnosis statement that includes confidence and remaining uncertainty.
-- Do not close investigation based only on occurrence evidence; closure requires mechanism evidence linking runtime state to failure path.
-
 # Async Activation Gate
 
 - Async mode is optional, but MUST be activated when either condition is met:
@@ -160,6 +146,7 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
   - exact code path or branch that produces the failure
   - visible impact for users or system behavior
 - Tie each diagnosis claim to runtime evidence and code location.
+- Diagnose only when evidence connects the trigger, runtime state, executed path, failure point, and impact; occurrence alone is insufficient.
 - Propose a concrete fix at code level:
   - file/module to change
   - behavioral change to implement
