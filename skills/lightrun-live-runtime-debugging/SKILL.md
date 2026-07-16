@@ -111,49 +111,37 @@ Run cleanup only when this investigation created or explicitly inherited runtime
 4. Collect only evidence that can change a diagnosis decision; update the hypothesis ranking after each result.
 5. Apply the async activation gate when immediate capture is insufficient.
 6. Iterate until evidence supports one diagnosis or the remaining hypotheses are inconclusive.
-7. Run cleanup and return the applicable handoff from the output contract.
+7. When actions are owned, run cleanup; return the applicable outcome below.
 
-# Output Contract
+# Return One Outcome
 
-- Preflight pass:
-  - selected source target(s) (`agentPoolName` + selector mode(s))
-  - source-selection reasoning and pagination/filter note (if used)
-  - next runtime action (first evidence tool and why)
-- Preflight fail:
-  - blocker category
-  - exact remediation required
-  - explicit retry condition
-- Runtime blocker:
-  - failed Lightrun MCP tool (exact exposed identifier)
-  - reason/error class
-  - mitigation applied (timeout/window update and/or source revalidation)
-  - troubleshooting reference used (when applicable)
-  - immediate next action
-- Reproduction required:
-  - active async action IDs (only when async branch is active)
-  - selected source target(s)
-  - exact reproduction instruction
-  - action window used
-  - expected next signal to capture
-  - explicit retry condition
-- Mode decision summary:
-  - async activation rule met: yes/no
-  - selected mode: synchronous continuation or asynchronous capture with later resume
-  - if async not activated, explicit reason
-- Final handoff:
-  - selected source target(s) and source-selection note (if user clarification was needed)
-  - async action state summary (only when async branch is used; per action: id, hypothesis mapping, latest status, retrieved hit count, cleanup decision)
-  - cleanup summary:
-    - cancelled action IDs
-    - retained action IDs with reason and expected expiry window
-    - already-terminal action IDs
-  - reproduction instruction + action time window used
-  - investigation question
-  - hypothesis matrix result (leading, ruled out, inconclusive)
-  - evidence summary separating observed facts from inference
-  - bug mechanism summary (trigger, path, failure point, impact)
-  - diagnosis statement with confidence level
-  - disconfirming evidence considered
-  - remaining unknowns and why they matter
-  - concrete code-fix proposal (target files/modules, behavior change, validation plan)
-  - recommended next step
+Emit only the applicable branch and omit empty fields.
+
+## Blocked
+
+- Failed capability and blocker
+- Attempted mitigation
+- Exact retry condition
+
+## Reproduction Required
+
+Use only when relevant owned actions remain active.
+
+- Owned action state
+- Exact reproduction instruction and active window
+- Resume condition
+
+## Inconclusive
+
+- Evidence obtained and hypotheses weakened
+- Missing discriminator and why it matters
+- Safest next probe
+
+## Diagnosed
+
+- Evidence-backed mechanism: trigger → state → path → failure → impact
+- Observed facts separated from inference
+- Confidence, disconfirming evidence, and remaining uncertainty
+- Recommended fix and validation plan
+
+Append cleanup disposition only when owned actions exist.
