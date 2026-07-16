@@ -58,32 +58,9 @@ Complete source discovery per [MCP tool discovery](references/mcp-tool-discovery
 - When async mode is activated, create async action(s), persist action IDs, provide reproduction-required handoff, and stop active diagnosis until next run.
 - If reproducibility confidence is low or user-reported failure is intermittent, favor async in the first evidence cycle.
 
-# Async Runtime Action Protocol
+# Async Runtime Actions
 
-- Use this protocol when async runtime tools are available in MCP.
-- Discover currently available runtime tool names from MCP at run time and use the exact exposed identifiers.
-- The protocol requires these capabilities:
-  - create an async runtime action for a hypothesis signal,
-  - check async action status by action ID,
-  - retrieve captured values and/or call stack when new hits are available,
-  - cancel async action when it is no longer needed.
-- At action creation time, persist: `actionId`, hypothesis ID, source target, code location, purpose, creation time, max wait, last known status, last retrieved hit count.
-- For uncertain reproduction timing, use a long async window by default (recommended baseline: 1800-3600 seconds), then adjust only with explicit reason.
-- After creating an async action, perform bounded in-session status polling for a short but meaningful window.
-  - use a small polling budget (for example 60-90 seconds total in-session),
-  - if new hits arrive in this window, retrieve data immediately and continue investigation in the same run,
-  - if no usable results arrive by budget end, keep action active and switch to reproduction-required handoff for later resume.
-- On each new skill run for the same investigation:
-  - load persisted action IDs first,
-  - call status first for each still-relevant action,
-  - retrieve data only when status hit count increased beyond previously retrieved count.
-- During bounded in-session polling, stop when status is terminal: `COMPLETED`, `FAILED`, `ERROR`, `TIMEOUT`, `CANCELLED`, or when the in-session polling budget is reached.
-- If status reaches terminal during bounded in-session polling and hit count increased since last getter call, perform one final getter call before closing the action outcome.
-- If status is still pending/running with no usable results by end of current run, return a handoff that includes:
-  - active action IDs,
-  - exact reproduction steps,
-  - retry condition for the next run.
-- Cancel stale or no-longer-needed actions and record cleanup decision in handoff.
+When async mode is activated or existing action IDs are provided, read [Async runtime actions](references/async-actions.md) before creating, polling, retrieving, or cancelling actions.
 
 # Runtime Action Cleanup Gate
 
