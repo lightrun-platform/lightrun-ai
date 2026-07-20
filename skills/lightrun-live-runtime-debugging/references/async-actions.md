@@ -7,7 +7,7 @@
   - retrieve captured values and/or call stack when new hits are available,
   - cancel async action when it is no longer needed.
 - At action creation time, persist: `actionId`, hypothesis ID, source target, code location, purpose, creation time, max wait, last known status, and the last retrieved result marker when exposed.
-- Use the tool-default action duration unless another window has a concrete diagnostic benefit.
+- Use the tool-default action duration only when it covers the expected reproduction latency and fits the task or session bounds. Otherwise choose an explicit bounded window and state the diagnostic reason.
 - After creating an async action, poll for a bounded, task-appropriate in-session window.
   - if new hits arrive in this window, retrieve data immediately and continue investigation in the same run,
   - if no usable results arrive by budget end, keep action active and switch to reproduction-required handoff for later resume.

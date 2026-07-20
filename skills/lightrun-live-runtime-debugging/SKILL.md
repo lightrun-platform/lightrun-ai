@@ -26,6 +26,7 @@ Provide a repeatable live runtime debugging workflow that helps QA and engineers
 
 Before the first runtime capture, read [MCP tool discovery](references/mcp-tool-discovery.md) and complete its source-discovery preflight. Treat exposed tool schemas and descriptions as authoritative.
 
+- Inspect relevant code before capture. Place each probe on an executable location tied to a hypothesis discriminator.
 - If preflight fails, do not invoke capture tools; return the blocker, required remediation, and retry condition.
 - Select the strongest target from available metadata. Ask for clarification only when viable candidates remain indistinguishable.
 - On a later run, re-enumerate exposed tools and check inherited async action IDs before creating replacements.
@@ -52,6 +53,7 @@ Run cleanup only when this investigation created or explicitly inherited runtime
 
 - Use tool-default collection timing unless another window has a concrete diagnostic benefit.
 - Keep evidence collection focused on actions that can change diagnosis or next steps.
+- After each result, reassess information gain. If repeated actions do not change the hypothesis ranking or next step, change the source, location, signal, or hypothesis before continuing.
 - Once the bug mechanism is sufficiently confirmed for the current user-impact question, prefer synthesis and handoff over additional broad sampling.
 
 # Action Error Mitigation
@@ -81,6 +83,7 @@ Run cleanup only when this investigation created or explicitly inherited runtime
   - key state values observed at runtime
   - exact code path or branch that produces the failure
   - visible impact for users or system behavior
+- For user-reported failures, state the concrete request or runtime state, the expected behavior, and why the observed execution path violates that expectation.
 - Tie each diagnosis claim to runtime evidence and code location.
 - Diagnose only when evidence connects the trigger, runtime state, executed path, failure point, and impact; occurrence alone is insufficient.
 - Propose a concrete fix at code level:
@@ -102,6 +105,8 @@ Run cleanup only when this investigation created or explicitly inherited runtime
 # Return One Outcome
 
 Emit only the applicable branch and omit empty fields.
+
+Include established investigation state needed to audit or resume: question, selected source, hypothesis dispositions, evidence-to-code mapping, and owned action dispositions. Omit unavailable fields and workflow narration.
 
 ## Blocked
 
