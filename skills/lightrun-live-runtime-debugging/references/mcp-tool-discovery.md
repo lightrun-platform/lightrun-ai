@@ -32,8 +32,7 @@ Before any runtime evidence capture:
 ### Pass criteria
 
 - At least one accessible agent pool with registered agents.
-- A concrete target is selected for runtime tools:
-  - `agentPoolName` plus exactly one selector mode among the modes accepted by the chosen evidence tool schema (`agentNames`, `tagNames`, and/or `customSourceName` as applicable).
+- A concrete target satisfies the chosen evidence tool's required targeting fields.
 - For `customSourceName`, proceed when the user supplies a known name if discovery tools do not list custom sources.
 
 ### Fail criteria
@@ -43,8 +42,8 @@ Before any runtime evidence capture:
 ### Source selection guidance
 
 - Inspect agent metadata (for example `metadata.tags`) when descriptions expose it; prefer a **shared tag** when targeting a group of related agents.
-- `tagNames` typically use logical **AND** (all tags must match); `agentNames` typically use logical **OR**.
-- Prefer the most specific targeting that answers the question: `agentNames` > `customSourceName` > `tagNames`.
+- Follow selector semantics from the chosen tool schema; do not assume how names or tags are combined.
+- Prefer the most specific targeting that answers the investigation question.
 - When the user names an environment or service, use name/tag patterns with wildcards when the schema supports them before scanning full unpaginated lists.
 - If several targets fit, select the strongest candidate(s) using service ownership, environment match, and expected execution path; ask the user only when confidence remains low.
 
@@ -62,5 +61,5 @@ Before any runtime evidence capture:
 ## Evidence tool selection
 
 - Match tools to hypothesis signals using MCP descriptions and parameter fit.
-- Before each action, state what decision the action can change; skip actions that cannot change diagnosis or next steps.
+- Skip actions that cannot change diagnosis or next steps.
 - Re-check exposed tools when resuming a later run and adapt if capabilities changed.

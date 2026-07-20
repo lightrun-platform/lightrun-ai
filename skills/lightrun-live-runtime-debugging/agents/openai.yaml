@@ -1,10 +1,10 @@
 interface:
   display_name: "Lightrun Live Runtime Debugging"
-  short_description: "Investigate live runtime issues with deterministic evidence capture"
+  short_description: "Diagnose live failures with runtime evidence"
   icon_small: "./assets/lightrun-small.svg"
   icon_large: "./assets/lightrun.png"
   brand_color: "#0078D4"
-  default_prompt: "Use $lightrun-live-runtime-debugging to run a deterministic live runtime investigation with mandatory preflight, evidence-first capture, async action lifecycle handling (create/status/getters/cancel), cross-run action resume by action ID, and explicit blocker/handoff output."
+  default_prompt: "Use $lightrun-live-runtime-debugging to diagnose a live failure by testing hypotheses with targeted Lightrun runtime evidence."
 
 dependencies:
   tools:
