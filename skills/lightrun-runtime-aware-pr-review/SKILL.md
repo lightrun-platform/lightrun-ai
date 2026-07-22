@@ -4,8 +4,8 @@ description: >-
   Use when reviewing a pull request with runtime or production evidence — for
   example to review a PR with runtime verification, gather production evidence,
   or simulate a patch on live samples. Reviews a pull request by diffing against
-  the deployed code, checking historical coverage, collecting live samples when
-  needed, and simulating the patch on captured production inputs.
+  the PR merge base, collecting live samples, and simulating the
+  patch on captured production inputs.
 ---
 
 # Goal
@@ -14,43 +14,47 @@ Provide a single PR review backbone that uses runtime production evidence when p
 
 # Scope
 
-- In scope: deployed-commit diffing, runtime verifiability checks, historical hit discovery, live sampling, runtime patch simulation, and review findings.
-- Out of scope: code changes, rollout execution, and repository-specific automation beyond what is documented in the phase references.
+- In scope: PR merge-base diffing, deployed-revision resolution for instrumentation, runtime verifiability checks, live sampling, runtime patch simulation with PR-base vs PR-head attribution, and review findings.
+- Out of scope: code changes, rollout execution, historical runtime-profile hit discovery (coming soon), and repository-specific automation beyond what is documented in the phase references.
 
 # How To Use This Skill
 
 Read and follow these references in order. Each phase produces a specific artifact; confirm that artifact exists and meets the phase's exit criteria before advancing to the next phase.
 
-1. [Intro](references/intro.md) — agent role, the seven-step process, and stage-vs-automation output separation
+1. [Intro](references/intro.md) — agent role, the process steps, and stage-vs-automation output separation
 2. [Constraints](references/constraints.md) — the hard rules every phase must obey
-3. [Phase 0 - Get deployed commit](references/phase-0-get-deployed-commit.md) — the baseline commit and production→PR-head diff
+3. [Phase 0 - Get deployed commit](references/phase-0-get-deployed-commit.md) — PR base/head SHAs, PR diff, and optional deployed revision
 4. [Phase 1 - Feasibility check](references/phase-1-feasibility-check.md) — a verifiable / not-verifiable determination
-5. [Phase 2 - Runtime profile](references/phase-2-runtime-profile.md) — per-area hit coverage from existing profile data
-6. [Phase 3 - Sampling plan](references/phase-3-sampling-plan.md) — snapshot entries only for uncovered areas
-7. [Phase 4 - Execute snapshots](references/phase-4-execute-snapshots.md) — captured production samples per verification location
-8. [Phase 5 - Patch simulation](references/phase-5-patch-simulation.md) — per-hit pre/post behavior, the runtime verdict, and scenario-driven findings
-9. [Output format](references/output-format.md) — the final automation-response transcript
+5. [Phase 2 - Verification areas](references/phase-2-verification-areas.md) — PR diff areas mapped to deployed equivalents
+6. [Phase 3 - Runtime profile](references/phase-3-runtime-profile.md) — coming soon; record unavailable and continue
+7. [Phase 4 - Sampling plan](references/phase-4-sampling-plan.md) — snapshot entries for uncovered verification areas
+8. [Phase 5 - Execute snapshots](references/phase-5-execute-snapshots.md) — captured production samples at deployed locations only
+9. [Phase 6 - Patch simulation](references/phase-6-patch-simulation.md) — PR-base vs PR-head behavior, runtime assessment, and scenario-driven findings
+10. [Output format](references/output-format.md) — the final automation-response transcript
 
 # Checkpoints
 
 Before moving from one phase to the next, confirm the current phase's exit criteria are met:
 
-- After **Phase 0**: a baseline commit is chosen and the production→PR-head (or base→PR-head) diff is in hand.
+- After **Phase 0**: `pr_base_sha`, `pr_head_sha`, and the PR diff (`pr_base_sha` → `pr_head_sha`) are in hand; `deployed_sha` is recorded when resolved.
 - After **Phase 1**: feasibility is determined; if not verifiable, the run stops here with the Phase 1 message.
-- After **Phase 2**: every diff-derived verification area is marked covered or uncovered with a hit source or reason.
-- After **Phase 3**: snapshot entries exist only for areas still uncovered by the runtime profile (or the plan is skipped/partial as appropriate).
-- After **Phase 4**: every verification location has at least one hit, **or** the run stopped with a Sampling Request because one or more locations still had zero hits (resume required before Phase 5).
-- After **Phase 5**: the runtime verdict is justified with specific hit values and code lines, and the full Output Format response is emitted.
+- After **Phase 2**: every PR verification area has a deployed mapping and status (`uncovered` or `not runtime-verifiable`).
+- After **Phase 3**: record `runtime_profile_mcp: unavailable` (coming soon) and proceed with Phase 2 mapped areas still `uncovered`.
+- After **Phase 4**: snapshot entries exist for the highest-value uncovered verification areas (up to 3).
+- After **Phase 5**: every verification location has at least one hit, **or** the run stopped with a Sampling Request because one or more locations still had zero hits (resume required before Phase 6).
+- After **Phase 6**: the runtime assessment is justified with PR-base vs PR-head behavior on valid samples, and the full Output Format response is emitted.
 
 Do not advance a phase until its exit criteria are satisfied; loop back to the prior phase when evidence is incomplete.
 
 # Working Rules
 
-- Treat the deployed production code as the baseline for all runtime instrumentation.
-- Use runtime profile evidence before planning live snapshots.
-- Use live snapshots only for verification areas still uncovered after historical search.
+- Use the PR diff (`pr_base_sha` → `pr_head_sha`) for all verification areas, attribution, findings, runtime assessment, and merge recommendation.
+- Use `deployed_sha` only to locate safe runtime instrumentation and describe true deployed production behavior.
+- Never use `deployed_sha` → `pr_head_sha` as the PR review diff.
+- Never query, instrument, or snapshot PR-only or unmapped coordinates.
+- Skip runtime profile search in this skill (coming soon); plan and run live snapshots for Phase 2 mapped `uncovered` areas directly.
 - Keep phase messages and the final automation output separate per the intro reference.
-- For async live snapshots: partial hits do not complete Phase 4 — if any verification location still has zero hits after the bounded in-session poll, emit the Sampling Request and stop instead of proceeding to Phase 5.
+- For async live snapshots: partial hits do not complete Phase 5 — if any verification location still has zero hits after the bounded in-session poll, emit the Sampling Request and stop instead of proceeding to Phase 6.
 - Follow every constraint in [Constraints](references/constraints.md).
 
 # Deliverable
