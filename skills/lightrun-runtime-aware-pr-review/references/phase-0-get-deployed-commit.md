@@ -1,15 +1,36 @@
 ## Phase 0 — Get Deployed Commit
 
 
-Before analyzing the PR, determine the best baseline for review and fetch the correct diff.
+Before analyzing the PR, resolve the PR diff and optionally the deployed production revision.
 
-1. Parse `owner`, `repo`, and PR head SHA from the PR URL (`https://github.com/{owner}/{repo}/pull/{number}`), or call GitHub MCP `get_pull_request` with `owner`, `repo`, `pull_number` and read `head.sha`.
+### Step 1 — Resolve PR base and head
 
-2. Choose the baseline commit for comparison:
+1. Parse `owner`, `repo`, and PR number from the PR URL (`https://github.com/{owner}/{repo}/pull/{number}`), or call GitHub MCP `get_pull_request` with `owner`, `repo`, `pull_number`.
+2. Read `base.sha` and `head.sha` from the PR.
+3. Call the compare API:
 
-### A. When a deployed production revision can be determined
+   ```bash
+   gh api "repos/{owner}/{repo}/compare/{base_sha}...{head_sha}"
+   ```
 
-If the repository or environment exposes a reliable deployed revision, resolve `deployed_sha`, then diff **production -> PR head** (not base branch -> PR head).
+4. Set:
+   - `pr_base_sha` = `merge_base_commit.sha` from the compare response
+   - `pr_head_sha` = `head.sha` from the PR response
+
+5. Fetch the PR diff:
+
+   ```bash
+   gh api "repos/{owner}/{repo}/compare/{pr_base_sha}...{pr_head_sha}" \
+     -H "Accept: application/vnd.github.diff"
+   ```
+
+Use this diff (`pr_base_sha` → `pr_head_sha`) for **all** subsequent phases: verification areas, attribution, findings, verdict, and merge recommendation.
+
+**Never** use `deployed_sha` → `pr_head_sha` as the PR review diff.
+
+### Step 2 — Resolve deployed revision (instrumentation only)
+
+Resolve `deployed_sha` only when a trustworthy deployed revision is available. `deployed_sha` is used **only** to locate safe runtime instrumentation and interpret true deployed production behavior — not to define the PR diff.
 
 Possible sources for `deployed_sha` include:
 - deployment metadata exposed by the application or platform
@@ -17,20 +38,14 @@ Possible sources for `deployed_sha` include:
 - environment or CI/CD metadata available to the user
 - a production SHA explicitly provided by the user
 
-When using a deployed baseline:
+When `deployed_sha` cannot be resolved, do not create PR-derived live snapshots and do not claim deployed production behavior.
 
-```bash
-gh api "repos/{owner}/{repo}/compare/{deployed_sha}...{pr_head_sha}" \
-  -H "Accept: application/vnd.github.diff"
-```
+Record in output how `deployed_sha` was determined when resolved.
 
-Use this diff for all subsequent phases.
+### Step 3 — Record audit fields
 
-Record in output how `deployed_sha` was determined.
-
-### B. When no deployed production revision can be determined
-
-Use the PR's default diff (base branch vs PR head).
-
-Record in output that the review used the PR base rather than a deployed production baseline.
+Record in final output:
+- `pr_base_sha`
+- `pr_head_sha`
+- `deployed_sha` (when resolved, otherwise note that it is unavailable)
 

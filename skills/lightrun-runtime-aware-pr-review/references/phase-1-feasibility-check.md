@@ -25,4 +25,10 @@ If the PR is **NOT verifiable**:
 
 ### User Message
 > **This PR cannot be verified with runtime production data.**
-> **Reason:** [Concise explanation of why none of the changes are observable in current production code.]
+>
+> **Runtime assessment**
+> - **Risk score:** not scored
+> - **Risk label:** not scored
+> - **Confidence:** 0%
+> - **Evidence status:** not runtime-verifiable
+> - **Basis:** [Concise explanation of why none of the changes are observable in current production code.]

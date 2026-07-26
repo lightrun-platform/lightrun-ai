@@ -7,46 +7,65 @@ Do **not** mix this section with intermediate phase messages. Phase-specific req
 **PR**
 [Link to pull request]
 
+**Revision audit**
+- `pr_base_sha`: [merge base SHA]
+- `pr_head_sha`: [PR head SHA]
+- `deployed_sha`: [deployed SHA when resolved, or `unavailable`]
+
 **Feasibility Determination**
 [Verifiable / Not verifiable + reason]
 
-**Runtime Profile**
-`runtime_profile_mcp: available | unavailable`
+**Verification Areas**
+For each PR diff-derived verification area from Phase 2:
+- **Area:** [description from PR diff]
+- **Deployed mapping:** [deployed file:line or method at `deployed_sha`, or `no deployed equivalent`]
+- **Status:** `covered` | `uncovered` | `not runtime-verifiable`
+- **Hit revision:** [revision for each hit, or `n/a`]
+- **Hit count / reason:** [count and source when covered; reason when uncovered or not runtime-verifiable]
 
-For each diff-derived verification area: `covered` (hit count, source) or `uncovered` (reason no relevant hits found).
+**Runtime Profile**
+`runtime_profile_mcp: unavailable` (coming soon — not available in this skill)
+
+Skip per-area profile coverage; treat all Phase 2 mapped `uncovered` areas as needing live sampling.
 
 **Sampling Plan**
-[Up to 3 snapshot entries from Phase 3, or `skipped (full profile coverage)` when Phase 2 covered all areas, or `partial (uncovered areas only)` when Phase 3 planned only gaps]
+[Up to 3 snapshot entries from Phase 4 for Phase 2 mapped uncovered areas]
 
 **Tool Calls Executed**
-- Runtime Profile: [query_hits_state / query_variable_values / get_snapshot calls, params]
-- Per location: [live snapshot tool(s) called, params — or "skipped (covered by runtime profile)"]
+- Runtime Profile: skipped (coming soon)
+- Per location: [live snapshot tool(s) called, params]
 
 **Captured Samples**
-[Raw or summarized values per verification location. Mark locations with zero hits as "No hits".]
+[Raw or summarized values per runtime-verifiable verification location, with hit revision. Mark locations with zero hits as "No hits". List `not runtime-verifiable` areas as unsampled.]
 
 **Intended change**
-[short summary from Phase 4 Step 1]
+[short summary from Phase 6 Step 1]
 
 **Risk surfaces**
-[bullets from Phase 4 Step 2]
+[bullets from Phase 6 Step 2]
 
 **Runtime patch simulation**
 
-For each verification location:
-| Hit # | Captured values | Pre-change behavior | Post-change behavior | Unexpected? |
-|-------|----------------|---------------------|----------------------|-------------|
-| 1     | ...            | ...                 | ...                  | Yes / No    |
+For each runtime-verifiable PR verification location with hits:
+| Hit # | Hit revision | Captured values | PR-base behavior | PR-head behavior | PR-attributable unexpected? |
+|-------|--------------|-----------------|------------------|------------------|----------------------------|
+| 1     | ...          | ...             | ...              | ...              | Yes / No                   |
 
 [Repeat table per verification location if more than one.]
 
-**Runtime verdict**
-`LIKELY_SAFE_ON_PROD_SAMPLES` / `RISK_ON_PROD_SAMPLES` / `INSUFFICIENT_PROD_SAMPLES`
+**Runtime assessment**
+- **Risk score:** `0` / `1` / `2` / `3` / `4` / `5` / `not scored`
+- **Risk label:** `No observed regression` / `Negligible` / `Low` / `Moderate` / `High` / `Critical` / `not scored`
+- **Confidence:** `[0–100]%`
+- **Evidence status:** `sufficient` / `limited` / `inconclusive` / `not runtime-verifiable`
 
-[One paragraph justifying the verdict, referencing specific hit values, sanitized values, code paths from the diff, and any unsampled verification locations.]
+**Basis**
+[One concise paragraph justifying the assessment. Reference specific hit values, hit revisions, sanitized values, code paths from the PR diff, unsampled runtime-verifiable locations, and `not runtime-verifiable` areas as applicable.]
+
+When confidence is below 50%, use `Risk score: not scored`, `Risk label: not scored`, and `Evidence status: inconclusive`. When no changed area can produce meaningful runtime evidence, including the Phase 1 not-verifiable categories, use `Risk score: not scored`, `Risk label: not scored`, `Confidence: 0%`, and `Evidence status: not runtime-verifiable`. For a mixed-status PR with captured runtime evidence demonstrating PR-attributable risk, retain the corresponding score, use `Evidence status: limited`, reduce confidence without lowering it below 50% solely because other areas cannot produce meaningful runtime evidence, and list those areas in the basis.
 
 **Simulated scenarios**
-[numbered list with full scenario structure from Phase 4 Step 3]
+[numbered list with full scenario structure from Phase 6 Step 3]
 
 **Design verdict**
 - Work-item fit:
@@ -56,7 +75,7 @@ For each verification location:
 - Highest-risk missing test:
 
 **Review findings**
-[0 to 5 findings, highest severity first; include only High confidence findings]
+[0 to 5 findings, highest severity first; include only High confidence findings grounded in the PR diff]
 
 **Suggested tests**
 [concrete tests to add]
@@ -67,8 +86,8 @@ Choose one:
 - Merge after minor fixes
 - Needs design changes before merge
 
-Factor in both the runtime verdict and scenario-driven findings. A `LIKELY_SAFE_ON_PROD_SAMPLES` verdict does not override High-confidence P0/P1 findings from scenario review.
+Factor in both the runtime assessment and scenario-driven findings. A low runtime risk score does not override High-confidence P0/P1 findings from scenario review, and a finding priority does not automatically change the runtime risk score.
 
 **Next Actions**
-[If LIKELY_SAFE or RISK: state what the verdict means for the PR reviewer.]
-[If INSUFFICIENT: list unsampled locations and suggest higher-traffic lines or looser conditions for a follow-up run.]
+[State what the runtime assessment means for the PR reviewer, independently from findings and merge recommendation.]
+[If evidence is `inconclusive` or `not runtime-verifiable`: list unsampled runtime-verifiable locations and affected areas; suggest higher-traffic deployed lines or looser conditions for a follow-up run when safe and applicable.]
