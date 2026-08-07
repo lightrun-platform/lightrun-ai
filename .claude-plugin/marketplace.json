@@ -25,6 +25,12 @@
       "source": "./skills/lightrun-ask-prod",
       "skills": "./",
       "description": "Answer questions about live production system behavior — current values, durations, hit counts, and distributions — by instrumenting running services with Lightrun."
+    },
+    {
+      "name": "lightrun-runtime-context",
+      "source": "./skills/lightrun-runtime-context",
+      "skills": "./",
+      "description": "Diagnose slow endpoints, latency or SLO regressions, timeouts, deadlines, and hangs with threshold-selected runtime context or focused active-path evidence for known hangs."
     }
   ]
 }

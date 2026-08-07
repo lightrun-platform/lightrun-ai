@@ -1,0 +1,15 @@
+interface:
+  display_name: "Lightrun Runtime Context"
+  short_description: "Diagnose latency, timeouts, and hangs with runtime context"
+  icon_small: "./assets/lightrun-small.svg"
+  icon_large: "./assets/lightrun.png"
+  brand_color: "#0078D4"
+  default_prompt: "Use $lightrun-runtime-context to diagnose a slow, timed-out, or hanging operation with threshold-selected or active-path runtime evidence."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "lightrun"
+      description: "Lightrun MCP server"
+      transport: "streamable_http"
+      url: "https://app.lightrun.com/mcp"

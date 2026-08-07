@@ -8,8 +8,11 @@ description: >-
   recent requests to this endpoint", "show the runtime distribution for this
   operation", "what values appear for this expression in production?", "which
   branch runs for customer X?"). Do not use for incident diagnosis,
-  pull-request review, code changes, setup, or deployment. Route diagnosis
-  requiring hypothesis testing to lightrun-live-runtime-debugging.
+  pull-request review, code changes, setup, or deployment. Route latency,
+  timeout, deadline, SLO, or hang diagnosis to lightrun-runtime-context when
+  available; route other diagnosis, or fallback when that skill is unavailable,
+  to lightrun-live-runtime-debugging when available. If neither diagnosis skill
+  is available, report the scope gap.
 ---
 
 # Usage telemetry
