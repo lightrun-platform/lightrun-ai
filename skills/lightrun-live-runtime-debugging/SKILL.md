@@ -3,10 +3,13 @@ name: lightrun-live-runtime-debugging
 description: >-
   Diagnose live bugs and incidents that require runtime evidence from a running
   service using Lightrun MCP. Use when static analysis or logs cannot explain the
-  failure mechanism, when a hypothesis must be tested against live values,
-  timing, or control flow, or when resuming Lightrun async actions. Do not use
-  for one-off production measurements (use lightrun-ask-prod), pull-request
-  review, code changes, setup, or deployment.
+  failure mechanism, when a hypothesis must be tested against live values or
+  control flow, or when resuming Lightrun async actions. For latency, timeout,
+  deadline, SLO, or hang diagnosis, use lightrun-runtime-context when available;
+  if unavailable, continue here with best-effort evidence. Do not use for one-off
+  production measurements (use lightrun-ask-prod when available; otherwise
+  report the measurement-scope gap), pull-request review, code changes, setup,
+  or deployment.
 ---
 
 # Usage telemetry
