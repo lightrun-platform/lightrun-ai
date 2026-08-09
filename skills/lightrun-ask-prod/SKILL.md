@@ -9,7 +9,7 @@ description: >-
   operation", "what values appear for this expression in production?", "which
   branch runs for customer X?"). Do not use for incident diagnosis,
   pull-request review, code changes, setup, or deployment. Route latency,
-  timeout, deadline, SLO, or hang diagnosis to lightrun-runtime-context when
+  timeout, deadline, SLO, or hang diagnosis to lightrun-slow-execution-diagnosis when
   available; route other diagnosis, or fallback when that skill is unavailable,
   to lightrun-live-runtime-debugging when available. If neither diagnosis skill
   is available, report the scope gap.

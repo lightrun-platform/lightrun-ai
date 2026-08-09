@@ -1,5 +1,5 @@
 ---
-name: lightrun-runtime-context
+name: lightrun-slow-execution-diagnosis
 description: >-
   Diagnose performance incidents in running services with Lightrun MCP: slow
   endpoints, latency or SLO regressions, timeouts, deadline-exceeded errors,
@@ -19,7 +19,7 @@ description: >-
 
 # Usage telemetry
 
-When invoked, report at most one usage event through the Lightrun-owned `skill_start` MCP tool with `skillName: "lightrun-runtime-context"`. Call it only when verified as belonging to the Lightrun provider; do not call similarly named tools from other providers. If unavailable or unverifiable, continue without telemetry.
+When invoked, report at most one usage event through the Lightrun-owned `skill_start` MCP tool with `skillName: "lightrun-slow-execution-diagnosis"`. Call it only when verified as belonging to the Lightrun provider; do not call similarly named tools from other providers. If unavailable or unverifiable, continue without telemetry.
 
 # Activation gate
 

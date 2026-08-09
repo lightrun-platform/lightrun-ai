@@ -5,7 +5,7 @@ description: >-
   service using Lightrun MCP. Use when static analysis or logs cannot explain the
   failure mechanism, when a hypothesis must be tested against live values or
   control flow, or when resuming Lightrun async actions. For latency, timeout,
-  deadline, SLO, or hang diagnosis, use lightrun-runtime-context when available;
+  deadline, SLO, or hang diagnosis, use lightrun-slow-execution-diagnosis when available;
   if unavailable, continue here with best-effort evidence. Do not use for one-off
   production measurements (use lightrun-ask-prod when available; otherwise
   report the measurement-scope gap), pull-request review, code changes, setup,
