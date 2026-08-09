@@ -57,15 +57,15 @@ For the threshold path, read [Threshold capture protocol](references/threshold-c
 
 # Runtime support
 
-Follow the exposed schema if capabilities change. The current boundary is:
+Follow exposed schemas if capabilities change.
 
-- Duration measurement and threshold capture: Java, Kotlin, and Scala agents when the create schema exposes the required parameters. Confirm compatibility through create or status responses.
+- Async duration: Lightrun 1.87+; Java, Kotlin, or Scala with a compatible JVM agent.
+- Threshold snapshots: Lightrun and JVM agent 1.89+; require `snapshotThresholdMs`, `snapshotExpressions`, and `snapshotMaxHits` in the create schema.
 - Regular snapshots: Java, Kotlin, Scala, Python, Node.js, and .NET agents.
-
-- Apply this boundary when reliable context identifies the runtime.
-- Otherwise mark compatibility unknown. Make one create attempt; if accepted, confirm through status. Discovery may expose only agent names and `metadata.tags`.
-- For Python, Node.js, or .NET, skip duration tools and baseline timing.
-- Do not retry an unchanged unsupported target or capability. Report partial coverage when only some targeted agents accept the action.
+- Non-JVM targets: skip duration tools and baseline timing.
+- Discovery: agent names and `metadata.tags` may be the only metadata. Never infer versions. Tools and parameters verify Lightrun/MCP support; one create/status cycle verifies agent support.
+- Failure: missing tools or parameters indicate a Lightrun/MCP gap. Unsupported-version, compatibility, or `returnedError` indicates an agent gap. Identify the layer in `blocked` or `inconclusive` outcomes. Do not retry unchanged targets; report partial fleet support.
+- Recovery: apply [evidence path 3](#choose-the-evidence-path) after a threshold gap. Recommend Lightrun 1.87+ for async duration, or Lightrun and JVM agent 1.89+ for threshold capture.
 
 # Capture and correlate
 
