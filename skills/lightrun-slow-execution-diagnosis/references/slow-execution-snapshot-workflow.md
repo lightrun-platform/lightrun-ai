@@ -7,12 +7,12 @@ A **slow-execution snapshot** is captured at Toc when measured duration exceeds 
 ## Derive and validate the threshold
 
 1. Derive the boundary from a timeout, deadline, SLO, reported slow limit, or existing logs, metrics, or traces. Never invent one.
-2. If no boundary exists, collect baseline timing with a synchronous or non-threshold duration tool only when the target runtime supports it. Use the baseline only to derive the threshold.
+2. If no boundary exists, collect baseline timing with an exposed non-threshold duration tool only when the target runtime supports it. Use the baseline only to derive the threshold.
 3. Account for strict semantics: capture occurs only when elapsed duration is greater than `snapshotThresholdMs`.
    - To capture near-timeout or near-SLO executions, choose an evidence-based threshold slightly below the limit and record the margin.
    - Use the limit itself only when executions beyond it are the target.
 4. Normalize the threshold to the schema unit. `snapshotThresholdMs` uses milliseconds. Record the value, source, and rationale.
-5. Require an async execution-duration create schema with threshold and snapshot-expression parameters, plus duration status/samples and snapshot status/values. Synchronous-only duration or missing threshold parameters cannot provide this evidence.
+5. Require an async execution-duration create schema with threshold and snapshot-expression parameters, plus duration status/samples and snapshot status/values. A duration tool without threshold parameters cannot provide this evidence.
 6. Do not combine unrelated actions or substitute historical/query tools to imitate slow-execution snapshots. User-supplied historical results may provide supporting context.
 
 ## Place and configure the action
