@@ -4,8 +4,8 @@ description: >-
   Diagnose performance incidents in running services with Lightrun MCP: slow
   endpoints, latency or SLO regressions, timeouts, deadline-exceeded errors,
   hangs, and slowness that is intermittent, sporadic, occasional, happens only
-  sometimes, or appears only under load. For performance incident diagnosis,
-  prefer this over lightrun-live-runtime-debugging,
+  sometimes, or appears only under load. Use when diagnosing a performance
+  incident; prefer this over lightrun-live-runtime-debugging,
   including for mixed slow-and-incorrect cases. Use slow-execution snapshots
   when a duration boundary separates problematic executions; use focused
   active-path snapshots or call stacks for known hangs that may not reach an end
@@ -57,8 +57,6 @@ For path 1, read [Slow-execution snapshot workflow](references/slow-execution-sn
 
 # Runtime support
 
-Follow exposed schemas if capabilities change.
-
 | Evidence | Runtime and version gate |
 | --- | --- |
 | Async duration | Java, Kotlin, or Scala; Lightrun 1.87+; compatible JVM agent |
@@ -66,10 +64,9 @@ Follow exposed schemas if capabilities change.
 | Regular snapshot | Java, Kotlin, Scala, Python, Node.js, or .NET |
 
 - For non-JVM targets, use regular snapshots; skip duration and baseline timing.
-- Never infer versions from agent names or `metadata.tags`. Verify Lightrun/MCP support from schemas and agent support with one create/status cycle.
+- Never infer versions from agent names or `metadata.tags`.
 - Treat missing tools or parameters as a Lightrun/MCP gap. Treat unsupported-version, compatibility, or `returnedError` as an agent gap.
-- Name the gap in the outcome, apply [evidence path 3](#choose-the-evidence-path), and do not retry unchanged targets. Report partial fleet support.
-- Recommend 1.87+ for async duration, or Lightrun and JVM agent 1.89+ for slow-execution snapshots.
+- Name the gap, report partial fleet support, and recommend the applicable version from the table.
 
 # Capture and correlate
 
@@ -94,8 +91,6 @@ Follow exposed schemas if capabilities change.
                     -> snapshot_get_values({"actionId": actionId})
    snapshot_get_call_stack({"actionId": actionId})  # optional when exposed
    ```
-
-   Resolve tool names from discovery and apply the linked protocol's derivation, lifecycle, and recovery rules.
 
 3. For non-threshold capture:
    - Create a focused regular snapshot and store its action ID.

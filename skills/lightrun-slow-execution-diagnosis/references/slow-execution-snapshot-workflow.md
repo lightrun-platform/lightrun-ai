@@ -18,10 +18,10 @@ A **slow-execution snapshot** is captured at Toc when measured duration exceeds 
 ## Place and configure the action
 
 1. Place start and end markers around the smallest section that tests the performance hypothesis.
-2. Remember that duration includes the end line and `snapshotExpressions` are evaluated there. Place the end marker after the relevant work while every expression remains in scope.
-3. Use one relevant exit path when the schema accepts one end line. Create separate focused actions for additional exits.
+2. Duration includes the reached end line; keep every snapshot expression in scope at every selected end line.
+3. Use `endLines` for multiple exits when the schema exposes it (Lightrun 1.91+). Otherwise use one exit per focused action.
 
-Use a bounded lifetime and set `snapshotMaxHits` to the smallest useful count. Raise it above one only when comparing slow executions can change the diagnosis.
+Use a bounded lifetime and set `snapshotMaxHits` to the smallest useful count. Raise it only when comparing slow executions can change the diagnosis.
 
 ## Track and poll
 
