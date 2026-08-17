@@ -1,6 +1,8 @@
-# Threshold capture protocol
+# Slow-execution snapshot workflow
 
-Read this reference only after selecting threshold-based duration capture. Treat exposed Lightrun MCP schemas and descriptions as authoritative.
+Read this reference only after selecting the slow-execution snapshot path. Treat exposed Lightrun MCP schemas and descriptions as authoritative.
+
+A **slow-execution snapshot** is captured at Toc when measured duration exceeds `snapshotThresholdMs`.
 
 ## Derive and validate the threshold
 
@@ -11,7 +13,7 @@ Read this reference only after selecting threshold-based duration capture. Treat
    - Use the limit itself only when executions beyond it are the target.
 4. Normalize the threshold to the schema unit. `snapshotThresholdMs` uses milliseconds. Record the value, source, and rationale.
 5. Require an async execution-duration create schema with threshold and snapshot-expression parameters, plus duration status/samples and snapshot status/values. Synchronous-only duration or missing threshold parameters cannot provide this evidence.
-6. Do not combine unrelated actions or substitute historical/query tools to imitate threshold capture. User-supplied historical results may provide supporting context.
+6. Do not combine unrelated actions or substitute historical/query tools to imitate slow-execution snapshots. User-supplied historical results may provide supporting context.
 
 ## Place and configure the action
 

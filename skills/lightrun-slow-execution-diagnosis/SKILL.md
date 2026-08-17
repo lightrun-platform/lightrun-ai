@@ -6,7 +6,7 @@ description: >-
   hangs, and slowness that is intermittent, sporadic, occasional, happens only
   sometimes, or appears only under load. For performance incident diagnosis,
   prefer this over lightrun-live-runtime-debugging,
-  including for mixed slow-and-incorrect cases. Use threshold-selected context
+  including for mixed slow-and-incorrect cases. Use slow-execution snapshots
   when a duration boundary separates problematic executions; use focused
   active-path snapshots or call stacks for known hangs that may not reach an end
   marker. Select the narrowest code section, derive an evidence-based threshold,
@@ -40,14 +40,14 @@ Read [MCP tool discovery](references/mcp-tool-discovery.md) to enumerate tools, 
 
 Choose one path:
 
-1. Use threshold-based duration capture when a defensible duration boundary distinguishes problematic executions.
+1. Select problematic executions by duration when a defensible boundary distinguishes them.
 2. Use a focused regular snapshot and its call stack when a consistent performance failure does not need duration discrimination, or when a suspected hang may not reach the end marker.
-3. When threshold capture is unavailable, use the non-threshold path only if it can still test the original performance hypothesis; otherwise return `blocked` with the missing capability and retry condition.
+3. If path 1 is unavailable, use the non-threshold path only if it can still test the original performance hypothesis; otherwise return `blocked` with the missing capability and retry condition.
 
 - Keep non-threshold evidence tied to the original hypothesis and label it non-threshold-discriminated.
 - If the investigation becomes functional-only, continue with `lightrun-live-runtime-debugging` when installed and preserve established evidence. Otherwise return `inconclusive` with the missing discriminator and evidence needed next.
 
-For the threshold path, read [Threshold capture protocol](references/threshold-capture.md) for threshold derivation, marker placement, create parameters, dual-lifecycle polling, and resume state. Follow it end to end before creating or resuming an action.
+For path 1, read [Slow-execution snapshot workflow](references/slow-execution-snapshot-workflow.md) for threshold derivation, marker placement, create parameters, dual-lifecycle polling, and resume state. Follow it end to end before creating or resuming an action.
 
 # Select the target and context
 
@@ -59,18 +59,22 @@ For the threshold path, read [Threshold capture protocol](references/threshold-c
 
 Follow exposed schemas if capabilities change.
 
-- Async duration: Lightrun 1.87+; Java, Kotlin, or Scala with a compatible JVM agent.
-- Threshold snapshots: Lightrun and JVM agent 1.89+; require `snapshotThresholdMs`, `snapshotExpressions`, and `snapshotMaxHits` in the create schema.
-- Regular snapshots: Java, Kotlin, Scala, Python, Node.js, and .NET agents.
-- Non-JVM targets: skip duration tools and baseline timing.
-- Discovery: agent names and `metadata.tags` may be the only metadata. Never infer versions. Tools and parameters verify Lightrun/MCP support; one create/status cycle verifies agent support.
-- Failure: missing tools or parameters indicate a Lightrun/MCP gap. Unsupported-version, compatibility, or `returnedError` indicates an agent gap. Identify the layer in `blocked` or `inconclusive` outcomes. Do not retry unchanged targets; report partial fleet support.
-- Recovery: apply [evidence path 3](#choose-the-evidence-path) after a threshold gap. Recommend Lightrun 1.87+ for async duration, or Lightrun and JVM agent 1.89+ for threshold capture.
+| Evidence | Runtime and version gate |
+| --- | --- |
+| Async duration | Java, Kotlin, or Scala; Lightrun 1.87+; compatible JVM agent |
+| Slow-execution snapshot | Same runtimes; Lightrun and JVM agent 1.89+; create schema exposes `snapshotThresholdMs`, `snapshotExpressions`, and `snapshotMaxHits` |
+| Regular snapshot | Java, Kotlin, Scala, Python, Node.js, or .NET |
+
+- For non-JVM targets, use regular snapshots; skip duration and baseline timing.
+- Never infer versions from agent names or `metadata.tags`. Verify Lightrun/MCP support from schemas and agent support with one create/status cycle.
+- Treat missing tools or parameters as a Lightrun/MCP gap. Treat unsupported-version, compatibility, or `returnedError` as an agent gap.
+- Name the gap in the outcome, apply [evidence path 3](#choose-the-evidence-path), and do not retry unchanged targets. Report partial fleet support.
+- Recommend 1.87+ for async duration, or Lightrun and JVM agent 1.89+ for slow-execution snapshots.
 
 # Capture and correlate
 
 1. On resume, re-enumerate tools and call status for saved or recovered action IDs before creating anything. Use `get_actions` with the stable correlation key when exposed.
-2. **Minimal threshold quickstart:** For a validated `checkout-service` target at these lines with an evidence-derived 450 ms boundary, call:
+2. **Minimal slow-execution snapshot quickstart:** For a validated `checkout-service` target at these lines with an evidence-derived 450 ms boundary, call:
 
    ```text
    execution_duration_create({
@@ -114,9 +118,7 @@ Always include:
 - observations, hypotheses, and confidence;
 - every owned action's disposition.
 
-- `blocked`: state the failed activation, preflight, or capability, evidence already established, remediation, and exact retry condition.
-- `reproduction-required`: list active action IDs, target, code location, threshold or non-threshold rationale, creation time, expiry or active window, reproduction request, and exact resume step. Include the protocol's separate duration and snapshot lifecycle records for threshold actions; include schema-exposed lifecycle fields for non-threshold actions.
-- `inconclusive`: state what was observed or ruled out, the remaining evidence gap, and the next discriminating evidence required.
-- `diagnosed`: connect trigger, runtime state, executed path, latency, timeout, or hang mechanism, and impact; include a code-level fix and validation checks.
-
-Do not claim diagnosis unless evidence connects trigger, runtime state, executed path, latency, timeout, or hang mechanism, and user impact.
+- `blocked`: include the failed gate, established evidence, remediation, and exact retry condition.
+- `reproduction-required`: include active action IDs, target and location, capture rationale, creation and expiry, reproduction request, and exact resume step. Record both lifecycles for slow-execution snapshot actions; use schema lifecycle fields otherwise.
+- `inconclusive`: include observations and rule-outs, the remaining gap, and the next discriminating evidence.
+- `diagnosed`: claim only when evidence connects the trigger, runtime state, executed path, latency, timeout, or hang mechanism, and impact. Include a code fix and validation checks.
