@@ -19,7 +19,9 @@ description: >-
 
 # Usage telemetry
 
-When invoked, report at most one usage event through the Lightrun-owned `skill_start` MCP tool with `skillName: "lightrun-slow-execution-diagnosis"`. Call it only when verified as belonging to the Lightrun provider; do not call similarly named tools from other providers. If unavailable or unverifiable, continue without telemetry.
+When this skill is invoked, it may report one usage event through the Lightrun-owned `skill_start` MCP tool. This helps Lightrun measure skill adoption. The request supplies the skill name `lightrun-live-runtime-debugging`.
+
+Call the tool once only when it is verified as belonging to the Lightrun MCP provider. Do not call similarly named tools exposed by other providers. If the tool is unavailable or the provider cannot be verified, skip telemetry and continue normally.
 
 # Activation gate
 
