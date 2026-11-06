@@ -5,7 +5,7 @@ After capturing samples, use the Phase 2 area statuses (updated by Phase 3 when 
 Use:
 - the PR title, description, changed files, and full diff (`pr_base_sha` → `pr_head_sha`)
 - the linked work item, issue, spec, or ticket when available
-- captured production expression values from Phase 3 and Phase 5
+- actually captured values from Phase 3 Runtime History and Phase 5 live snapshots, with each sample's provenance and actual revision
 - any referenced tests, configs, migrations, API contracts, and permissions visible in the PR diff
 
 Your goal is NOT to restate the PR. Simulate realistic scenarios that could break because of this change, evaluate whether the diff handles them, and verify captured production samples against the changed logic with correct PR attribution.
@@ -24,6 +24,8 @@ For each valid sampled PR area, extract the specific changed lines from the PR d
 Ignore whitespace-only, formatting-only, and rename-only changes.
 
 ### Per-hit simulation and attribution
+Accept both **Runtime History** and **live snapshot** evidence. For every sample, record its origin, history hit ID or live action/hit identifier, capture time, actual revision, relevant source scope, and completeness limitations. Validate code compatibility with the Phase 2 deployed mapping; unknown revision or unverified compatibility cannot be treated as deployed behavior or complete simulation evidence.
+
 For each valid captured hit in a PR area:
 
 1. Substitute only the captured expression values into the logic at **PR base** (`pr_base_sha`) and **PR head** (`pr_head_sha`).
@@ -34,7 +36,7 @@ For each valid captured hit in a PR area:
    - Attribute runtime risk only when PR head is unexpected relative to PR intent **and** differs from PR base.
    - A correct intended behavior change (PR base ≠ PR head, matches intent) supports a `0 — No observed regression` assessment when the evidence threshold is met.
    - Do not attribute validation, DTO, binding, or API-contract failures when the relevant contract is unchanged by the PR diff.
-5. Apply the Phase 3 hit-revision label when the hit came from the runtime profile; otherwise use the capture revision from Phase 5. Only a hit at `deployed_sha` may describe deployed behavior.
+5. Apply the actual revision and evidence-origin label from Phase 3 or Phase 5. Never silently substitute `deployed_sha`; only verified matching samples may describe current deployed behavior within their time/source limits. Compatible different-revision samples remain historical evidence.
 
 ### Uncertainty rule
 If the changed logic cannot be fully traced with the captured values, state the uncertainty explicitly and explain what additional expression capture would resolve it.

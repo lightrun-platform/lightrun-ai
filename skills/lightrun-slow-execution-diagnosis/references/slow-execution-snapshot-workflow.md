@@ -13,7 +13,7 @@ A **slow-execution snapshot** is captured at Toc when measured duration exceeds 
    - Use the limit itself only when executions beyond it are the target.
 4. Normalize the threshold to the schema unit. `snapshotThresholdMs` uses milliseconds. Record the value, source, and rationale.
 5. Require an async execution-duration create schema with threshold and snapshot-expression parameters, plus duration status/samples and snapshot status/values. A duration tool without threshold parameters cannot provide this evidence.
-6. Do not combine unrelated actions or substitute historical/query tools to imitate slow-execution snapshots. User-supplied historical results may provide supporting context.
+6. Do not combine unrelated actions or substitute historical/query tools to imitate or replace duration-correlated slow-execution snapshots. Runtime History may provide supporting state/path context, whether queried or user-supplied; historical snapshots cannot establish a latency baseline or threshold. Use trustworthy latency evidence or supported live baseline timing as described above.
 
 ## Place and configure the action
 
