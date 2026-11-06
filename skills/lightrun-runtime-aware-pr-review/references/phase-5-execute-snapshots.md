@@ -1,13 +1,13 @@
 ## Phase 5 — Execute Snapshots
 
-**Skip condition:** Skip this phase entirely when no `uncovered` verification areas remain after Phase 2 (and Phase 3 when available). Otherwise, run live snapshots **only for locations still marked `uncovered`** (from the Phase 4 plan) — do not re-instrument areas already satisfied by runtime profile hits.
+**Skip condition:** Skip this phase entirely when no `uncovered` verification areas remain after Phase 2 (and Phase 3 when available). Otherwise, run live snapshots **only for locations still marked `uncovered`** (from the Phase 4 plan) — do not re-instrument areas already satisfied by Runtime History captures.
 
 Use the Lightrun MCP tools available to capture expression values at each uncovered location. Discover the available tools from the MCP server and adapt to whatever snapshot API is exposed.
 
 ### Step 0 — Register correlation key
 Before creating any snapshots, check whether the MCP exposes a correlation tool (e.g. a tool for registering an investigation, session, or correlation key).
 - **If such a tool exists**: call it with the PR URL as the correlation key.
-- **If no dedicated correlation tool exists**: pass the PR URL as `correlationKey` (or equivalent parameter) directly on every snapshot creation call.
+- **If no dedicated correlation tool exists**: pass the PR URL as `correlationKey` (or equivalent parameter) directly on every snapshot creation call when the exposed schema supports it.
 
 This links all snapshots created during this run to the PR for traceability.
 
@@ -41,7 +41,7 @@ Unless there is a clear reason to do otherwise, use explicit snapshot limits tha
 ### Async tool pattern (if MCP exposes create + status + retrieve tools)
 
 **Coverage gate (apply before steps 4–5):**
-- **Sufficient** = every verification location (uncovered after Phase 2/3 and/or planned in Phase 4) has at least one hit from Phase 3 profile data or Phase 5 live capture.
+- **Sufficient** = every verification location (uncovered after Phase 2/3 and/or planned in Phase 4) has at least one hit from Phase 3 Runtime History captures or Phase 5 live capture.
 - **Insufficient** = any verification location still has zero hits after the bounded in-session poll below.
 
 Partial hits on one location do not satisfy Phase 5 while other locations remain at zero.
@@ -73,7 +73,7 @@ Emit a chat message containing:
 - The specific action the user must perform in the target system to trigger each code path — use the "How to trigger" from the Sampling Plan
 - The active trigger window for the current runtime actions. Use the tool default window unless a different window was intentionally chosen.
 
-Do not list areas already `covered` by Phase 3 runtime profile hits or locations that already have Phase 5 hits.
+Do not list areas already `covered` by Phase 3 Runtime History captures or locations that already have Phase 5 hits.
 
 Example format:
 
@@ -95,4 +95,4 @@ If no hits are captured for an uncovered location:
 - **First**: try a higher-traffic line in the same method, or loosen / remove the condition
 - **Then**: retry that location with an adjusted plan (up to **3 snapshot attempts per uncovered location**)
 
-Other verification areas keep their existing samples — runtime profile hits from Phase 3 and successful live captures from earlier attempts are not discarded when one location retries.
+Other verification areas keep their existing samples — Runtime History captures from Phase 3 and successful live captures from earlier attempts are not discarded when one location retries.

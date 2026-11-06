@@ -1,11 +1,12 @@
 ---
 name: lightrun-ask-prod
 description: >-
-  Answer questions about live production system behavior — current variable
-  values, execution durations, hit counts, and value distributions — by
-  instrumenting running services with Lightrun MCP tools. Use when the question
-  requires live runtime data rather than static code analysis (e.g. "show
-  recent requests to this endpoint", "show the runtime distribution for this
+  Answer questions about production system behavior — captured variable values,
+  execution durations, hit counts, and value distributions — using suitable
+  existing Runtime History first, then live instrumentation with Lightrun MCP
+  tools when needed. Use when the question requires runtime evidence rather
+  than static code analysis (e.g. "show recent requests to this endpoint",
+  "show the runtime distribution for this
   operation", "what values appear for this expression in production?", "which
   branch runs for customer X?"). Do not use for incident diagnosis,
   pull-request review, code changes, setup, or deployment. Route latency,
@@ -23,7 +24,7 @@ Call the tool once only when it is verified as belonging to the Lightrun MCP pro
 
 # Ask Prod
 
-Query live production runtime to answer questions about system behavior using Lightrun's observability tools.
+Answer production questions from suitable captured Runtime History, falling back to live measurement when needed.
 
 ## MCP Tool Discovery
 
@@ -32,8 +33,9 @@ Follow [MCP tool discovery](references/mcp-tool-discovery.md). Read MCP tool sch
 ## Prerequisites
 
 - Lightrun MCP installed and active
-- Access to the relevant service's source code
-- At least one active agent pool connected to Lightrun
+- Access to relevant Runtime History for historical answers; history reads do not require active agents or source-discovery preflight
+- Access to relevant source code when locating code, interpreting captured behavior, or validating code-version compatibility
+- For live actions: an executable source location and at least one matching active agent pool connected to Lightrun
 
 ---
 
@@ -47,6 +49,7 @@ Read the user's question and identify:
 - Whether the question requires a single data point or a combination of capabilities
 - What runtime source scope is needed: one agent, multiple agents, a tag, a custom source, a region, or a customer-specific traffic path
 - Whether the answer requires a short collection window or a longer observation window
+- What capture time range and code version would make existing evidence suitable, especially for questions about current state
 
 ### 2. Identify the right capability
 
@@ -54,14 +57,27 @@ Select the Lightrun capability that best fits the question from the currently ex
 
 | If the question asks... | Use... |
 |---|---|
-| What is the current value of X? | Snapshot/expression capture |
+| What values, request examples, or branch/stack behavior were observed? | Runtime History; snapshot/expression capture if insufficient |
+| What is the current value of X? | Runtime History only if sufficiently current; otherwise snapshot/expression capture |
 | How long does operation X take? | Execution duration |
 | How often does line X run? | Execution count |
 | What range of values does X take over time? | Distribution / numeric metric |
 
-### 3. Locate the relevant code
+For a new duration, execution-count, or numeric-metric measurement that stored snapshots cannot supply, skip irrelevant history calls and proceed to the live flow. Historical hit counts and deduplicated values are not execution counts or measured production distributions.
 
-Before runtime evidence capture, identify an executable **file path** and **line number** tied to the requested measurement.
+### 3. Check suitable Runtime History
+
+When stored snapshots can answer the question, use the exposed Runtime History read tools before creating a live action. Follow the [history query guidance](references/mcp-tool-discovery.md#runtime-history-reads); do not gate these reads on active-agent/source preflight.
+
+1. Query the narrowest relevant code, time/version, and runtime-source scope supported by the schema, requesting only the evidence needed to answer the question.
+2. Evaluate suitability using the shared history guidance.
+3. If the evidence is suitable, answer directly using step 7 and create no live action. Otherwise explain the specific gap and continue to step 4.
+
+Empty or insufficient history triggers the existing live flow; it does not prove that code did not execute or that a value did not occur.
+
+### 4. Locate the relevant code for live measurement
+
+Before creating a live action, identify an executable **file path** and **line number** tied to the requested measurement.
 
 Useful signals by question type:
 - **Current values** (e.g. cache size, selected instance state): find the field or variable on the relevant object, at the point it is read or returned
@@ -71,7 +87,7 @@ Useful signals by question type:
 
 Select the strongest code candidate from available evidence. Ask the user only when viable candidates remain indistinguishable. If no executable location can be identified, do not capture; return the blocker, required remediation, and retry condition.
 
-### 4. Select the agent pool and agents
+### 5. Select the agent pool and agents for live measurement
 
 Complete source discovery using read-only discovery tools (see [Source discovery (preflight)](references/mcp-tool-discovery.md#source-discovery-preflight)). Follow tool-description usage flow and pagination when the pool or agent list is large.
 
@@ -86,7 +102,7 @@ Apply this selection logic:
 
 > Do not present a single-instance result as a global production answer. When full coverage is not available, describe the observed scope explicitly.
 
-### 5. Collect runtime data
+### 6. Collect live runtime data
 
 Call the appropriate Lightrun tool with the executable location, selected source scope, and observation window.
 
@@ -96,13 +112,14 @@ Use runtime actions for evidence collection:
 - Retain an owned action only for a concrete pending observation, recording its reason and expected window. After repeated no-data or low-information results, revalidate or change the source, code location, signal, or window
 - Follow the exposed schema's status and result-availability semantics: new results → retrieve them; non-terminal without new results → wait within the bounded window and return the resume condition; terminal → report the blocker or empty result
 
-### 6. Analyse and answer
+### 7. Analyse and answer
 
 Answer the measurement directly in plain language using the returned data:
 - If a distribution was collected, summarise the range, typical value, and any notable outliers
 - If multiple capabilities were used, synthesise the results into a single coherent answer
 - For count-style questions across multiple instances, aggregate only the selected sources and state the source coverage
 - Include the runtime sources covered, collection window, and limits of the result
+- Distinguish existing history from newly captured live evidence. Cite supporting hit IDs when available and state capture times, code version, sample scope, and completeness limits; do not present past captures as current state without sufficient evidence
 
 For each answer or handoff, include established state needed to understand or resume the measurement: measurement question, executable code location, selected source scope, observation window, observed facts and coverage limits, and owned action disposition when applicable. Omit unavailable fields and workflow narration.
 
@@ -112,7 +129,7 @@ For each answer or handoff, include established state needed to understand or re
 
 | Situation | Action |
 |---|---|
-| No agent pools found | Inform the user; ask them to verify the service is running and connected to Lightrun |
+| No agent pools found when live measurement is needed | Inform the user; ask them to verify the service is running and connected to Lightrun; this does not block an answer from sufficient history |
 | Line cannot be instrumented | Try an adjacent line; if still unavailable, explain the limitation to the user |
 
 ---

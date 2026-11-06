@@ -4,8 +4,8 @@ description: >-
   Diagnose performance incidents in running services with Lightrun MCP: slow
   endpoints, latency or SLO regressions, timeouts, deadline-exceeded errors,
   hangs, and slowness that is intermittent, sporadic, occasional, happens only
-  sometimes, or appears only under load. Use when diagnosing a performance
-  incident; prefer this over lightrun-live-runtime-debugging,
+  sometimes, or appears only under load. Use relevant Runtime History for
+  state/path context before creating live actions. Prefer this over lightrun-live-runtime-debugging,
   including for mixed slow-and-incorrect cases. Use slow-execution snapshots
   when a duration boundary separates problematic executions; use focused
   active-path snapshots or call stacks for known hangs that may not reach an end
@@ -27,20 +27,30 @@ Call the tool once only when it is verified as belonging to the Lightrun MCP pro
 
 Apply the description's scope exactly. Keep mixed slow-and-incorrect behavior in scope. For excluded work, use the named skill when installed. Otherwise return `blocked` with the scope mismatch and required workflow.
 
-# Preflight
+# Historical evidence
 
-Read [MCP tool discovery](references/mcp-tool-discovery.md) to enumerate tools, select sources, apply selectors, and recover missing MCP. Complete its preflight. Treat exposed schemas and descriptions as authoritative.
+Frame the performance hypotheses and identify the evidence that would distinguish them. Follow [Runtime History reads](references/mcp-tool-discovery.md#runtime-history-reads). Treat exposed schemas and descriptions as authoritative. History reads do not require active agents or new-action preflight.
 
-- Inspect the relevant code. Verify paths and lines when discovery exposes enough build-version data. Otherwise mark synchronization unverified, not mismatched.
-- Apply [Runtime support](#runtime-support) before deriving thresholds or baselines. Never infer runtime from file extensions.
+- Inspect the relevant code before interpreting historical or live evidence and declaring a mechanism. Verify paths and lines against captured code identity/version or available build metadata. When synchronization cannot be verified, mark it unverified, not mismatched.
+- Consider history before new live actions only when captured state or paths can test a performance hypothesis. Use suitable evidence to identify the executed path or likely slow section, update hypotheses, and choose focused expressions, stack data, executable locations, or probes.
+- Evaluate incident/capture time alignment, source/environment scope, repository, commit, file, function, and returned line. Check selected-value outcomes, completeness, and stack/frame truncation before deciding whether a capture distinguishes the hypotheses. Empty history means only no matching capture was found; it does not falsify a hypothesis.
+- Skip irrelevant history queries when the missing signal requires a fresh duration, execution count, numeric metric, or slow-execution threshold capture. Historical hit counts are captured samples, not execution frequency. Never infer a latency baseline or threshold from historical snapshots.
+- Diagnose without a new action when suitable history, together with trustworthy latency evidence from logs, metrics, traces, or another source, already establishes the required performance mechanism and meets the diagnosis gate below. Apply owned-action cleanup when relevant, then return the outcome.
+- If history is missing, stale, incomplete, mismatched, unavailable, or cannot supply the required signal, state the gap, preserve useful findings, and continue with the live workflow for the remaining discriminator.
+
+# Live-action preflight
+
+Complete [source-discovery preflight](references/mcp-tool-discovery.md#source-discovery-preflight) before creating any live action, including baseline timing. Historical conclusions remain subject to the evidence checks above, not live-source availability.
+
+- Apply [Runtime support](#runtime-support) before creating a live action. Never infer runtime from file extensions.
 - Accept a known user-supplied `customSourceName` even when discovery omits custom sources.
 - Do not create an action after source-discovery failure or a confirmed code-version mismatch. Missing version metadata alone is not a failure.
 
-**Checkpoint:** Proceed to evidence-path selection only after source discovery passes and a concrete target is selected. Runtime compatibility may remain unknown only under [Runtime support](#runtime-support).
+**Checkpoint:** Run source discovery and select a concrete target before creating a live action. Runtime compatibility may remain unknown only under [Runtime support](#runtime-support). Use existing latency evidence to select the code path and derive a threshold before live-source preflight. Run preflight only when creating a live action.
 
 # Choose the evidence path
 
-Choose one path:
+For a remaining live evidence need, choose one path:
 
 1. Select problematic executions by duration when a defensible boundary distinguishes them.
 2. Use a focused regular snapshot and its call stack when a consistent performance failure does not need duration discrimination, or when a suspected hang may not reach the end marker.
@@ -58,6 +68,8 @@ For path 1, read [Slow-execution snapshot workflow](references/slow-execution-sn
 - Use a condition when it safely narrows capture to the affected tenant, request, workload, or scenario.
 
 # Runtime support
+
+These gates apply to live action creation, including baseline timing, rather than history reads.
 
 | Evidence | Runtime and version gate |
 | --- | --- |
@@ -113,6 +125,7 @@ Always include:
 - runtime source and code range, or why either is unavailable;
 - threshold provenance, or why thresholding was not used;
 - observations, hypotheses, and confidence;
+- historical versus newly captured live evidence, with Runtime History hit IDs and capture times when available, source/version scope, and completeness limitations;
 - every owned action's disposition.
 
 - `blocked`: include the failed gate, established evidence, remediation, and exact retry condition.
