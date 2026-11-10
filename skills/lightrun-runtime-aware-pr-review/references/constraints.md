@@ -1,6 +1,6 @@
 ## Constraints
 
-Phase 2 owns verification-area derivation and deployed mapping. Phase 3 may reclassify mapped `uncovered` areas to `covered` when relevant, sufficiently complete Runtime History captures support simulation. Later phases must use that status rather than reclassifying an area.
+Phase 2 owns verification-area derivation and deployed mapping. Phase 3 may reclassify mapped `uncovered` areas to `covered`, `base-covered`, or `head-covered` according to the Runtime History evidence. Later phases must use that status rather than reclassifying an area.
 
 A **verification location** is a runtime-verifiable PR area represented by Phase 3 Runtime History captures or a Phase 4 sampling-plan entry.
 

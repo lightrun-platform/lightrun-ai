@@ -28,7 +28,7 @@ Read and follow these references in order. Each phase produces a specific artifa
 5. [Phase 1 - Feasibility check](references/phase-1-feasibility-check.md) — a verifiable / not-verifiable determination
 6. [Phase 2 - Verification areas](references/phase-2-verification-areas.md) — PR diff areas mapped to deployed equivalents
 7. [Phase 3 - Runtime History](references/phase-3-runtime-profile.md) — evaluate existing Runtime History for mapped areas before live sampling
-8. [Phase 4 - Sampling plan](references/phase-4-sampling-plan.md) — snapshot entries for uncovered verification areas
+8. [Phase 4 - Sampling plan](references/phase-4-sampling-plan.md) — snapshot entries for areas not fully covered
 9. [Phase 5 - Execute snapshots](references/phase-5-execute-snapshots.md) — captured production samples at deployed locations only
 10. [Phase 6 - Patch simulation](references/phase-6-patch-simulation.md) — PR-base vs PR-head behavior, runtime assessment, and scenario-driven findings
 11. [Output format](references/output-format.md) — the final automation-response transcript
@@ -40,8 +40,8 @@ Before moving from one phase to the next, confirm the current phase's exit crite
 - After **Phase 0**: `pr_base_sha`, `pr_head_sha`, and the PR diff (`pr_base_sha` → `pr_head_sha`) are in hand; `deployed_sha` is recorded when resolved.
 - After **Phase 1**: feasibility is determined; if not verifiable, the run stops here with the Phase 1 message.
 - After **Phase 2**: every PR verification area has a deployed mapping and status (`uncovered` or `not runtime-verifiable`).
-- After **Phase 3**: record history availability and evidence provenance; mark mapped areas `covered` only with suitable, sufficiently complete captures and leave remaining gaps `uncovered`. Skip live planning and capture when none remain.
-- After **Phase 4**: snapshot entries exist for the highest-value uncovered verification areas (up to 3).
+- After **Phase 3**: record history availability and evidence provenance; classify mapped areas as `covered`, `base-covered`, `head-covered`, or `uncovered` per Phase 3. Skip live planning and capture when all are `covered`.
+- After **Phase 4**: snapshot entries exist for the highest-value `base-covered`, `head-covered`, or `uncovered` verification areas (up to 3).
 - After **Phase 5**: every verification location has at least one hit, **or** the run stopped with a Sampling Request because one or more locations still had zero hits (resume required before Phase 6).
 - After **Phase 6**: the runtime assessment is justified with PR-base vs PR-head behavior on valid samples, and the full Output Format response is emitted.
 
@@ -54,7 +54,7 @@ Do not advance a phase until its exit criteria are satisfied; loop back to the p
 - Use `deployed_sha` only to locate safe runtime instrumentation and describe true deployed production behavior.
 - Never use `deployed_sha` → `pr_head_sha` as the PR review diff.
 - Never query, instrument, or snapshot PR-only or unmapped coordinates.
-- Follow [MCP tool discovery](references/mcp-tool-discovery.md) for history reads. Check suitable history first; create live snapshots only for mapped areas still `uncovered`. History reads do not require active agents or live-source preflight.
+- Follow [MCP tool discovery](references/mcp-tool-discovery.md) for history reads. Check suitable history first; create live snapshots only for mapped areas marked `base-covered`, `head-covered`, or `uncovered`. History reads do not require active agents or live-source preflight.
 - Keep phase messages and the final automation output separate per the intro reference.
 - For async live snapshots: partial hits do not complete Phase 5 — if any verification location still has zero hits after the bounded in-session poll, emit the Sampling Request and stop instead of proceeding to Phase 6.
 - Follow every constraint in [Constraints](references/constraints.md).

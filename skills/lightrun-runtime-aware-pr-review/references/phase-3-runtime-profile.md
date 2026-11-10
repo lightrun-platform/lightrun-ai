@@ -17,7 +17,7 @@ Query Runtime History **only** for Phase 2 PR verification areas still classifie
 
 Use the exposed history tools **only at deployed-equivalent locations**, following their schemas and descriptions rather than assuming tool names or provider prefixes.
 
-Reclassify a mapped area as `covered` only when relevant captures contain sufficient inputs to simulate both PR base and PR head.
+Classify a mapped area as `covered`, `base-covered`, `head-covered`, or `uncovered` according to the definitions below.
 
 #### How search tools support simulation
 
@@ -54,7 +54,7 @@ A hit is **relevant** when:
 - It is at a deployed-equivalent location for the verification area (same method/function/branch logic, not PR line numbers)
 - It matches `deployed_sha`, or was captured at another revision with a valid area mapping (label that revision explicitly)
 - Capture time and source/environment scope match the evidence need; repository, actual commit, file/function, and returned line match the inspected code
-- Selected-value outcomes and stack/frame completeness supply the inputs needed to simulate the changed logic at both PR base and PR head
+- Selected-value outcomes and stack/frame completeness supply the inputs needed to simulate the changed logic at PR base, PR head, or both
 
 ### No-hit handling — widen the search
 
@@ -67,7 +67,7 @@ If the initial query returns no relevant historical hits for a deployed-equivale
 - Then consider logically adjacent mapped callers, callees, or helpers for the same verification area.
 - Make up to **3 query attempts per verification area** before concluding that no relevant captures exist.
 
-Empty history means only that no matching capture was found, not that code did not execute or a value did not occur. Hit counts are captured samples, not execution frequency. Missing, stale, incomplete, mismatched, or unavailable history leaves the area `uncovered` for live fallback.
+Empty history means only that no matching capture was found, not that code did not execute or a value did not occur. Hit counts are captured samples, not execution frequency. History that supports only one side leaves the area `base-covered` or `head-covered`; history that supports neither leaves it `uncovered` for live fallback.
 
 ### Per-area outcome
 
@@ -75,17 +75,19 @@ For each Phase 2 area that was `uncovered`, record any status update from this p
 
 | Field | Value |
 |---|---|
-| Status | `covered` or `uncovered` (unchanged from Phase 2 when no hits) |
+| Status | `covered`, `base-covered`, `head-covered`, or `uncovered` (unchanged from Phase 2 when no hits) |
 | Evidence provenance | hit IDs, capture times, actual revisions, source scope, completeness limitations |
 
 | Status | Meaning |
 |---|---|
 | `covered` | Relevant, sufficiently complete captures support both simulations at a deployed-equivalent location — record them as **Captured Samples** for this area |
-| `uncovered` | Deployed equivalent exists but historical evidence is missing or unsuitable — needs live sampling via Phase 4 and Phase 5 |
+| `base-covered` | Evidence supports PR-base simulation but not PR head |
+| `head-covered` | Evidence supports PR-head simulation but not PR base |
+| `uncovered` | Deployed equivalent exists but evidence supports neither simulation — needs live sampling via Phase 4 and Phase 5 |
 
 Do not guess or fabricate samples. Only use values returned by Runtime History. Do not reclassify Phase 2 `not runtime-verifiable` areas.
 
 ### Next phase
 
-- **No PR areas `uncovered`:** skip Phase 4 and Phase 5 entirely; proceed to **Phase 6 — Patch Simulation** with history hits as captured samples and `not runtime-verifiable` areas recorded as unsampled.
-- **One or more PR areas `uncovered`:** proceed to **Phase 4 — Sampling Plan** for **`uncovered` deployed-equivalent PR areas only** (up to 3 total), then **Phase 5 — Execute Snapshots**. Areas already `covered` or `not runtime-verifiable` must not be re-instrumented or sampled.
+- **All mapped PR areas `covered`:** skip Phase 4 and Phase 5 entirely; proceed to **Phase 6 — Patch Simulation** with history hits as captured samples and `not runtime-verifiable` areas recorded as unsampled.
+- **One or more PR areas `base-covered`, `head-covered`, or `uncovered`:** proceed to **Phase 4 — Sampling Plan** for **`base-covered`, `head-covered`, or `uncovered` deployed-equivalent PR areas only** (up to 3 total), then **Phase 5 — Execute Snapshots**. Areas already `covered` or `not runtime-verifiable` must not be re-instrumented or sampled.

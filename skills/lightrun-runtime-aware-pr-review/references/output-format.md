@@ -19,9 +19,9 @@ Do **not** mix this section with intermediate phase messages. Phase-specific req
 For each PR diff-derived verification area from Phase 2:
 - **Area:** [description from PR diff]
 - **Deployed mapping:** [deployed file:line or method at `deployed_sha`, or `no deployed equivalent`]
-- **Status:** `covered` | `uncovered` | `not runtime-verifiable`
+- **Status:** `covered` | `base-covered` | `head-covered` | `uncovered` | `not runtime-verifiable`
 - **Hit revision:** [revision for each hit, or `n/a`]
-- **Hit count / reason:** [count and source when covered; reason when uncovered or not runtime-verifiable]
+- **Hit count / reason:** [count, source, and reason for the status]
 
 **Runtime History**
 `runtime_history: available | unavailable`
@@ -29,7 +29,7 @@ For each PR diff-derived verification area from Phase 2:
 [Per-area history scope, coverage and gaps; hit IDs, capture times, actual revisions, source/environment scope, completeness limits; or `skipped` when unavailable]
 
 **Sampling Plan**
-[Up to 3 snapshot entries from Phase 4 at deployed-equivalent locations only, or `skipped (full history coverage)` when Phase 3 covered all runtime-verifiable areas, or `skipped (no runtime-verifiable uncovered areas)`]
+[Up to 3 snapshot entries from Phase 4 at deployed-equivalent locations only, or `skipped (full history coverage)` when Phase 3 covered all runtime-verifiable areas, or `skipped (no runtime-verifiable areas requiring sampling)`]
 
 **Tool Calls Executed**
 - Runtime History: [exposed read tools called, bounded scope/includes — deployed-equivalent coordinates only]

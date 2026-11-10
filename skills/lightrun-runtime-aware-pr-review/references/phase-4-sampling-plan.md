@@ -1,14 +1,14 @@
 ## Phase 4 — Sampling Plan
 
-Plan live instrumentation only for areas marked `uncovered` with a deployed equivalent after Phase 2 mapping (and Phase 3 history evaluation when available).
+Plan live instrumentation only for areas marked `base-covered`, `head-covered`, or `uncovered` with a deployed equivalent after Phase 2 mapping (and Phase 3 history evaluation when available).
 
 ### When to run
 
 | Prior outcome | Action |
 |---|---|
 | `runtime_history: unavailable` (or Phase 3 skipped) | Plan up to 3 highest-value instrumentation points across all Phase 2 mapped `uncovered` areas |
-| One or more mapped areas still `uncovered` after Phase 3 | Plan only for those areas (up to 3 total) |
-| No mapped areas `uncovered` | **Skip this phase entirely** — proceed to Phase 6 |
+| One or more mapped areas still `base-covered`, `head-covered`, or `uncovered` after Phase 3 | Plan only for those areas (up to 3 total) |
+| All mapped areas `covered` | **Skip this phase entirely** — proceed to Phase 6 |
 
 Do not plan locations marked `covered` or `not runtime-verifiable`.
 
