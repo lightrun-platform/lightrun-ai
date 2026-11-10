@@ -69,8 +69,13 @@ Apply source-preflight recovery only when live evidence collection is needed; it
 3. Re-run the full source-discovery path.
 4. Create live actions only after preflight pass criteria are met.
 
-## Evidence tool selection
+## Live evidence/action creation
 
 - Match tools to the required evidence signal using MCP descriptions and parameter fit.
 - Before each action, state which decision or next step it can change; skip actions that cannot change either.
 - Re-check exposed tools when resuming a later run and adapt if capabilities changed.
+
+## Live action lifecycle
+
+- Select status, result, or cancellation tools compatible with the created action using their exposed schemas and descriptions.
+- Use the action identifier returned by creation as specified, and follow advertised readiness and terminal-state semantics rather than assuming a fixed asynchronous sequence.
