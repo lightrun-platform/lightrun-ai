@@ -19,14 +19,6 @@ Use the exposed history tools **only at deployed-equivalent locations**, followi
 
 Classify a mapped area as `covered`, `base-covered`, `head-covered`, or `uncovered` according to the definitions below.
 
-#### How search tools support simulation
-
-| Capability | Use for simulation |
-|---|---|
-| Coverage discovery | Resolve captured file/function identities within the Phase 2 mapping when needed; counts do not establish values or execution frequency |
-| Hit queries | Find relevant captures and request only the values, frames, or stack data needed for the changed logic |
-| Known-hit retrieval | Resolve a specific evidence gap for an already identified hit when supported |
-
 #### Query scope — from earlier phases
 
 Use the narrowest supported scope: PR repository, verified `deployed_sha` or a safely mapped historical revision, deployed-equivalent file/function, relevant source/environment and capture time, and needed value paths. Never use PR diff line numbers or silently relax a required revision, source, or time constraint. Follow exposed selector semantics.

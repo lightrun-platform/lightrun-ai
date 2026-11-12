@@ -49,7 +49,7 @@ Read the user's question and identify:
 - Whether the question requires a single data point or a combination of capabilities
 - What runtime source scope is needed: one agent, multiple agents, a tag, a custom source, a region, or a customer-specific traffic path
 - Whether the answer requires a short collection window or a longer observation window
-- What capture time range and code version would make existing evidence suitable, especially for questions about current state
+- What capture time range and code version are relevant to the question when using existing Runtime History
 
 ### 2. Identify the right capability
 
