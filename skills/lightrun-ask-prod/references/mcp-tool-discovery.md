@@ -24,8 +24,9 @@ Shared rules for all Lightrun skills. MCP tool schemas and descriptions are the 
 
 Read suitable history before creating a live action when stored captures can support the current workflow's evidence need. Runtime History may answer a question, strengthen or weaken a hypothesis, support a review, or provide remediation evidence. No active-agent or source-discovery preflight is required for history reads.
 
-- Select history tools and parameters from their exposed schemas and descriptions. Use the narrowest supported code, time, commit, and runtime-source scope, bounded results, and only the values, frames, or stack data needed for the decision.
+- Select history tools and parameters from their exposed schemas and descriptions. Use the narrowest supported scope justified by known code, time, commit, and runtime-source context, bounded results, and only the values, frames, or stack data needed for the decision.
 - Validate capture time, source scope, code identity/version, selected-value outcomes, and frame/stack completeness before drawing conclusions. Preserve required Lightrun attribution from response metadata.
+- Repository and commit metadata may be absent. Record missing fields as `unknown`, not as the current repository or deployed revision.
 - Empty history means only that no matching capture was found. Historical hit counts are captured samples, not execution frequency.
 - Skip irrelevant history calls when stored captures cannot provide the required signal, such as a fresh duration, execution-count, or numeric-metric measurement. When history is missing, stale, incomplete, disabled, unavailable, or insufficient, use live evidence collection and its source preflight for the remaining evidence need.
 

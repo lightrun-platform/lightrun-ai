@@ -119,7 +119,7 @@ Answer the measurement directly in plain language using the returned data:
 - If multiple capabilities were used, synthesise the results into a single coherent answer
 - For count-style questions across multiple instances, aggregate only the selected sources and state the source coverage
 - Include the runtime sources covered, collection window, and limits of the result
-- Distinguish existing history from newly captured live evidence. Cite supporting hit IDs when available and state capture times, code version, sample scope, and completeness limits; do not present past captures as current state without sufficient evidence
+- Distinguish existing history from newly captured live evidence. Cite supporting hit IDs when available and state capture times, code revision when known (`unknown` otherwise), sample scope, and completeness limits; do not present past captures as current state without sufficient evidence
 
 For each answer or handoff, include established state needed to understand or resume the measurement: measurement question, executable code location, selected source scope, observation window, observed facts and coverage limits, and owned action disposition when applicable. Omit unavailable fields and workflow narration.
 

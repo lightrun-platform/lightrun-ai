@@ -21,7 +21,7 @@ Classify a mapped area as `covered`, `base-covered`, `head-covered`, or `uncover
 
 #### Query scope — from earlier phases
 
-Use the narrowest supported scope: PR repository, verified `deployed_sha` or a safely mapped historical revision, deployed-equivalent file/function, relevant source/environment and capture time, and needed value paths. Never use PR diff line numbers or silently relax a required revision, source, or time constraint. Follow exposed selector semantics.
+Use the narrowest supported scope from known context: PR repository, verified `deployed_sha` or a safely mapped historical revision, deployed-equivalent file/function, relevant source/environment and capture time, and needed value paths. Apply repository/commit filters only when known and appropriate; their metadata may be absent from hits. Never use PR diff line numbers or silently relax a required revision, source, or time constraint. Follow exposed selector semantics.
 
 #### Search strategy
 
@@ -30,7 +30,7 @@ Search is driven by the PR diff; queries always run only at deployed-equivalent 
 1. Query each mapped `uncovered` area using its narrow historical scope.
 2. Request only the captured values and stack/frame data required by the changed logic, following the exposed schema.
 3. Evaluate value outcomes and completeness using the shared reference.
-4. Record the **actual revision attached to every hit**, or `unknown` when absent; never substitute `deployed_sha`.
+4. Record the **actual repository and revision attached to every hit**, or `unknown` for absent fields; never substitute the PR repository or `deployed_sha`.
 
 #### Historical hits
 
@@ -44,8 +44,8 @@ Search is driven by the PR diff; queries always run only at deployed-equivalent 
 A hit is **relevant** when:
 
 - It is at a deployed-equivalent location for the verification area (same method/function/branch logic, not PR line numbers)
-- It matches `deployed_sha`, or was captured at another revision with a valid area mapping (label that revision explicitly)
-- Capture time and source/environment scope match the evidence need; repository, actual commit, file/function, and returned line match the inspected code
+- When commit metadata is present, it matches `deployed_sha`, or was captured at another revision with a valid area mapping (label that revision explicitly)
+- Capture time and source/environment scope match the evidence need; available repository/commit metadata, file/function, and returned line are consistent with the verified code mapping
 - Selected-value outcomes and stack/frame completeness supply the inputs needed to simulate the changed logic at PR base, PR head, or both
 
 ### No-hit handling — widen the search
