@@ -69,7 +69,7 @@ For a new duration, execution-count, or numeric-metric measurement that stored s
 
 When stored snapshots can answer the question, use the exposed Runtime History read tools before creating a live action. Follow the [history query guidance](references/mcp-tool-discovery.md#runtime-history-reads); do not gate these reads on active-agent/source preflight.
 
-1. Query the narrowest relevant code, time/version, and runtime-source scope supported by the schema, requesting only the evidence needed to answer the question.
+1. Query the narrowest relevant code, time/version, and runtime-source scope supported by the selected Runtime History tool's input schema, requesting only the evidence needed to answer the question.
 2. Evaluate suitability using the shared history guidance.
 3. If the evidence is suitable, answer directly using step 7 and create no live action. Otherwise explain the specific gap and continue to step 4.
 
