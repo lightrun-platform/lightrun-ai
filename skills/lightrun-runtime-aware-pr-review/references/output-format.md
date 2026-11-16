@@ -19,24 +19,24 @@ Do **not** mix this section with intermediate phase messages. Phase-specific req
 For each PR diff-derived verification area from Phase 2:
 - **Area:** [description from PR diff]
 - **Deployed mapping:** [deployed file:line or method at `deployed_sha`, or `no deployed equivalent`]
-- **Status:** `covered` | `uncovered` | `not runtime-verifiable`
-- **Hit revision:** [revision for each hit, or `n/a`]
-- **Hit count / reason:** [count and source when covered; reason when uncovered or not runtime-verifiable]
+- **Status:** `covered` | `base-covered` | `head-covered` | `uncovered` | `not runtime-verifiable`
+- **Hit revision:** [actual revision for each hit, `unknown` when absent, or `n/a` when no hit]
+- **Hit count / reason:** [count, source, and reason for the status]
 
-**Runtime Profile**
-`runtime_profile_mcp: unavailable` (coming soon — not available in this skill)
+**Runtime History**
+`runtime_history: available | unavailable`
 
-Skip per-area profile coverage; treat all Phase 2 mapped `uncovered` areas as needing live sampling.
+[Per-area history scope, coverage and gaps; hit IDs, capture times, actual revisions, source/environment scope, completeness limits; or `skipped` when unavailable]
 
 **Sampling Plan**
-[Up to 3 snapshot entries from Phase 4 for Phase 2 mapped uncovered areas]
+[Up to 3 snapshot entries from Phase 4 at deployed-equivalent locations only, or `skipped (full history coverage)` when Phase 3 covered all runtime-verifiable areas, or `skipped (no runtime-verifiable areas requiring sampling)`]
 
 **Tool Calls Executed**
-- Runtime Profile: skipped (coming soon)
-- Per location: [live snapshot tool(s) called, params]
+- Runtime History: [exposed read tools called, bounded scope/includes — deployed-equivalent coordinates only]
+- Per location: [live snapshot tool(s) called, params — or "skipped (covered by Runtime History)" or "skipped (not runtime-verifiable)"]
 
 **Captured Samples**
-[Raw or summarized values per runtime-verifiable verification location, with hit revision. Mark locations with zero hits as "No hits". List `not runtime-verifiable` areas as unsampled.]
+[Raw or summarized values per runtime-verifiable verification location, with evidence origin (Runtime History or live snapshot), hit/action ID, capture time, actual revision (`unknown` if unavailable), source scope, and completeness limits. Mark locations with zero hits as "No hits". List `not runtime-verifiable` areas as unsampled.]
 
 **Intended change**
 [short summary from Phase 6 Step 1]

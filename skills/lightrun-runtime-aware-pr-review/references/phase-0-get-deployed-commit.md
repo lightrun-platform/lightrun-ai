@@ -5,24 +5,12 @@ Before analyzing the PR, resolve the PR diff and optionally the deployed product
 
 ### Step 1 — Resolve PR base and head
 
-1. Parse `owner`, `repo`, and PR number from the PR URL (`https://github.com/{owner}/{repo}/pull/{number}`), or call GitHub MCP `get_pull_request` with `owner`, `repo`, `pull_number`.
-2. Read `base.sha` and `head.sha` from the PR.
-3. Call the compare API:
+Follow [Code management](code-management.md).
 
-   ```bash
-   gh api "repos/{owner}/{repo}/compare/{base_sha}...{head_sha}"
-   ```
-
-4. Set:
-   - `pr_base_sha` = `merge_base_commit.sha` from the compare response
-   - `pr_head_sha` = `head.sha` from the PR response
-
-5. Fetch the PR diff:
-
-   ```bash
-   gh api "repos/{owner}/{repo}/compare/{pr_base_sha}...{pr_head_sha}" \
-     -H "Accept: application/vnd.github.diff"
-   ```
+1. Detect `code_host` from the PR URL and verify code-management access for that host (GitHub or Bitbucket).
+2. Fetch PR metadata. Set `pr_head_sha` to the source/head commit SHA.
+3. Resolve `pr_base_sha` as the merge base of destination and head.
+4. Fetch the unified diff for `pr_base_sha` → `pr_head_sha`.
 
 Use this diff (`pr_base_sha` → `pr_head_sha`) for **all** subsequent phases: verification areas, attribution, findings, verdict, and merge recommendation.
 

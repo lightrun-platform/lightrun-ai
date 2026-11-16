@@ -1,12 +1,13 @@
 ## Constraints
 
-Phase 2 owns verification-area derivation and deployed mapping. Phase 3 may reclassify mapped `uncovered` areas to `covered` when profile hits are found. Later phases must use that status rather than reclassifying an area.
+Phase 2 owns verification-area derivation and deployed mapping. Phase 3 may reclassify mapped `uncovered` areas to `covered`, `base-covered`, or `head-covered` according to the Runtime History evidence. Later phases must use that status rather than reclassifying an area.
 
-A **verification location** is a runtime-verifiable PR area represented by Phase 3 profile hits or a Phase 4 sampling-plan entry.
+A **verification location** is a runtime-verifiable PR area represented by Phase 3 Runtime History captures or a Phase 4 sampling-plan entry.
 
+- Detect the code host from the PR URL (GitHub or Bitbucket) and use that host’s APIs or MCP.
 - Use the PR diff (`pr_base_sha` → `pr_head_sha`) for review. Never use `deployed_sha` → `pr_head_sha` as the PR review diff.
 - Query and instrument only Phase 2 deployed-equivalent locations. Never use PR-only coordinates or PR line numbers for runtime tooling.
-- Record every hit's revision. Never describe a non-`deployed_sha` hit as current deployed behavior.
+- Record every hit's revision, or `unknown` when absent; never substitute `deployed_sha`. Never describe a non-`deployed_sha` hit as current deployed behavior.
 - Never suggest redeployment or feature flags
 - Read-only instrumentation only (no side effects)
 - Never produce per-change entries when the PR is not verifiable — one explanation only
