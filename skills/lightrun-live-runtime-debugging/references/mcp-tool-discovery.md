@@ -51,7 +51,7 @@ Before creating a live action for an evidence need that suitable history cannot 
 
 ### Source selection guidance
 
-- Inspect agent metadata (for example `metadata.tags`) when descriptions expose it; prefer a **shared tag** when targeting a group of related agents.
+- Inspect agent metadata (for example `metadata.tags`) when descriptions expose it.
 - Follow selector semantics from the chosen tool schema; do not assume how names or tags are combined.
 - Choose the most specific source scope that answers the current evidence need without assuming a universal selector preference order.
 - When the user names an environment or service, use name/tag patterns with wildcards when the schema supports them before scanning full unpaginated lists.

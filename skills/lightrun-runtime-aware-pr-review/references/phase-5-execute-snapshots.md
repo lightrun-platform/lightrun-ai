@@ -18,13 +18,7 @@ Resolve the runtime target from the environment and currently available Lightrun
 Always set:
 - `correlationKey`: PR URL
 
-Choose stable shared targeting values discovered from Lightrun source-discovery tools.
-
-Prefer:
-- `customSourceName`
-- `tagNames`
-
-Avoid `agentNames` unless there is a clear reason to target a specific instance.
+Choose stable shared targeting values discovered from Lightrun source-discovery tools, using the targeting rules in the snapshot tool's description.
 
 If multiple valid shared targets exist and the correct one is not clear from the PR context, ask the user to confirm the target environment or service.
 

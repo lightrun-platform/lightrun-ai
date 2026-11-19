@@ -95,7 +95,7 @@ Apply this selection logic:
 - Select the strongest runtime source candidate from available metadata for the service and question
 - Use a specific agent when the question is about one known instance
 - Use multiple agents when the answer should compare behavior across selected instances
-- Use a tag or custom source when the answer should cover a service, environment, region, tenant group, or another shared runtime scope
+- Follow the tool description when the answer should cover a service, environment, region, tenant group, or another shared runtime scope
 - Prefer sources actively serving traffic relevant to the question (e.g. for a US-specific question, prefer sources handling US requests if identifiable)
 - Ask the user only when viable source candidates remain indistinguishable
 - If source preflight fails, do not capture; return the blocker, required remediation, and retry condition
